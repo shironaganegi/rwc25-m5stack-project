@@ -1,0 +1,41 @@
+services:
+
+  shop_web:
+    container_name: shop_web
+    build:
+      context: shop_web
+      dockerfile: Dockerfile
+    volumes:
+      - ./shop_web:/var/www/html  # パスを合わせる
+    expose:
+      - "9000"
+    tty: true
+    environment:
+      - TZ=Asia/Tokyo
+      - BACKEND_URL=http://shop_web:8080  
+      - WATCHPACK_POLLING=true #ホットリロード（ソースコードを即時にアプリケーションに反映）
+    ports:
+      - "3000:80"
+    extra_hosts:
+      - host.docker.internal:host-gateway    
+    # env_file:
+    #   - ./shop_web/.env
+
+
+
+  user:
+    build:
+      context: ./user_web
+      dockerfile: Dockerfile
+    container_name: user_web
+    volumes:
+      - ./user_web:/var/www/html  # パスを合わせる
+    expose:
+      - "9000"
+    tty: true
+    environment:
+      - TZ=Asia/Tokyo
+    ports:
+      - "8000:80"
+    # env_file:
+    #   - ./user_web/.env
