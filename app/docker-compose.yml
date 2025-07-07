@@ -6,23 +6,14 @@ services:
       dockerfile: Dockerfile
     volumes:
       - ./shop_web:/var/www/html
-    expose:
-      - "9000"
-    tty: true
+    ports:
+      - "3000:80"  # ポートマッピングを80に変更
     environment:
       - TZ=Asia/Tokyo
-      - BACKEND_URL=http://shop_web:8080  
-      - WATCHPACK_POLLING=true
-    ports:
-      - "3000:80"
-    extra_hosts:
-      - host.docker.internal:host-gateway
     depends_on:
       - mysql-container
     networks:
       - app-network
-    # env_file:
-    #   - ./shop_web/.env
 
   user_web:
     build:
