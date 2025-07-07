@@ -30,10 +30,8 @@ RUN if [ -f "composer.json" ]; then \
 
 # 適切な権限を設定
 RUN chown -R www-data:www-data /var/www/html
-RUN mkdir -p /var/www/html/storage && chmod -R 755 /var/www/html/storage
 
-# PHPの設定を調整（必要に応じて）
-RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
+EXPOSE 80
 
-EXPOSE 8000
-CMD ["php-fpm"]
+# PHP内蔵サーバーを起動
+CMD ["php", "-S", "0.0.0.0:80", "-t", "/var/www/html"]
