@@ -1,35 +1,36 @@
 services:
-
   shop_web:
     container_name: shop_web
     build:
-      context: shop_web
+      context: ./shop_web
       dockerfile: Dockerfile
     volumes:
-      - ./shop_web:/var/www/html  # パスを合わせる
+      - ./shop_web:/var/www/html
     expose:
       - "9000"
     tty: true
     environment:
       - TZ=Asia/Tokyo
       - BACKEND_URL=http://shop_web:8080  
-      - WATCHPACK_POLLING=true #ホットリロード（ソースコードを即時にアプリケーションに反映）
+      - WATCHPACK_POLLING=true
     ports:
       - "3000:80"
     extra_hosts:
-      - host.docker.internal:host-gateway    
+      - host.docker.internal:host-gateway
+    depends_on:
+      - mysql-container
+    networks:
+      - app-network
     # env_file:
     #   - ./shop_web/.env
 
-
-
-  user:
+  user_web:
     build:
       context: ./user_web
       dockerfile: Dockerfile
     container_name: user_web
     volumes:
-      - ./user_web:/var/www/html  # パスを合わせる
+      - ./user_web:/var/www/html
     expose:
       - "9000"
     tty: true
@@ -37,5 +38,41 @@ services:
       - TZ=Asia/Tokyo
     ports:
       - "8000:80"
+    depends_on:
+      - mysql-container
+    networks:
+      - app-network
     # env_file:
     #   - ./user_web/.env
+
+  mysql-container:
+    container_name: "mysql"
+    build:
+      context: ./server/docker/mysql
+      dockerfile: Dockerfile
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DOCKER_DB_ROOT_PASS:-dev}
+      MYSQL_USER: ${DOCKER_DB_USERNAME:-dev}
+      MYSQL_PASSWORD: ${DOCKER_DB_PASSWORD:-dev}
+      MYSQL_DATABASE: ${DOCKER_DB_DATABASE:-laravel_stations}
+      MYSQL_TCP_PORT: 3306
+    ports:
+      - "${DOCKER_DB_PORT:-3306}:3306"
+    volumes:
+      - ./server/docker/mysql/init:/docker-entrypoint-initdb.d
+      - laravel-railway-mysql-data:/var/lib/mysql:cached
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DOCKER_DB_ROOT_PASS:-dev}"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+volumes:
+  laravel-railway-mysql-data:
+
+networks:
+  app-network:
+    driver: bridge
