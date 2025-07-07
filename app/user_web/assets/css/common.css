@@ -1,0 +1,283 @@
+/* --- Base Styles --- */
+body {
+    margin: 0;
+    padding: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background-color: #f8f8f8;
+    padding-top: 63px; /* ヘッダーの高さ分 */
+    padding-bottom: 80px; /* フッターの高さ分 */
+}
+
+main {
+    padding: 0;
+}
+
+/* --- Header & Footer --- */
+header {
+    background-color: white;
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1002; /* 最前面 */
+    box-sizing: border-box;
+    border-bottom: 3px solid #ffd700;
+}
+
+.logo {
+    height: 40px;
+}
+
+footer {
+    background-color: white;
+    border-top: 1px solid #e0e0e0;
+    padding: 10px 0;
+    display: flex;
+    justify-content: space-around;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1002; /* 最前面 */
+    box-sizing: border-box;
+}
+
+.footer-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    text-decoration: none;
+}
+
+/* --- Side Navigation Menu --- */
+.menu-button {
+    position: absolute;
+    left: 15px;
+    top: 16px;
+    width: 30px;
+    height: 30px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+}
+
+.menu-button span {
+    display: block;
+    width: 100%;
+    height: 3px;
+    background-color: #333;
+    border-radius: 2px;
+    position: absolute;
+    left: 0;
+    transition: transform 0.3s ease-in-out, top 0.3s ease-in-out, opacity 0.3s ease-in-out;
+}
+
+.menu-button span:nth-child(1) {
+    top: 5px;
+}
+.menu-button span:nth-child(2) {
+    top: 13.5px;
+}
+.menu-button span:nth-child(3) {
+    top: 22px;
+}
+
+.menu-button.active span:nth-child(1) {
+    top: 13.5px;
+    transform: rotate(45deg);
+}
+.menu-button.active span:nth-child(2) {
+    opacity: 0;
+}
+.menu-button.active span:nth-child(3) {
+    top: 13.5px;
+    transform: rotate(-45deg);
+}
+
+.side-nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 250px;
+    height: 100%;
+    background-color: #fff;
+    border-right: 1px solid #e0e0e0;
+    z-index: 1001; /* ヘッダーとフッターより奥 */
+    transform: translateX(-100%);
+    transition: transform 0.3s ease-in-out;
+    padding-top: 80px;
+    box-sizing: border-box;
+}
+
+.side-nav.active {
+    transform: translateX(0);
+}
+
+.side-nav ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.side-nav ul li a {
+    display: block;
+    padding: 15px 20px;
+    color: #333;
+    text-decoration: none;
+    font-size: 1.1rem;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.side-nav ul li a:hover {
+    background-color: #f8f8f8;
+}
+
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1000; /* 最背面 */
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+}
+
+.overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+
+/* --- SVG Footer Icons (currentColor version) --- */
+.footer-icon {
+    width: 44px;
+    height: 44px;
+    color: #555; /* ★通常時の色をここで一括指定 */
+    transition: all 0.2s ease-in-out;
+}
+
+.footer-button.active .footer-icon,
+.footer-button:hover .footer-icon {
+    color: #ffd700; /* ★アクティブ時の色をここで一括指定 */
+    transform: scale(1.1);
+}
+
+/* SVG内の線を持つパーツの太さを指定 */
+.footer-icon circle, 
+.footer-icon line,
+.footer-icon polyline,
+.footer-icon rect,
+.footer-icon path {
+    /* 通常時の線の太さを指定 */
+    /* fill:noneが指定されたpathにも適用される */
+    stroke-width: 1.5px; 
+}
+
+/* アクティブ時に太くしたい場合 */
+.footer-button.active .footer-icon circle,
+.footer-button.active .footer-icon line,
+.footer-button.active .footer-icon path {
+    stroke-width: 2.5px;
+}
+
+
+/* --- Other Common Styles --- */
+.yellow-separator {
+    border: none;
+    border-top: 4px solid #ffd700;
+    margin: 0;
+}
+
+.search-container {
+    width: 100%;
+    background-color: #f0f0f0;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    padding: 8px 12px;
+    box-sizing: border-box;
+}
+
+.search-icon {
+    width: 20px;
+    height: 20px;
+    margin-right: 8px;
+    fill: #888;
+}
+
+.search-input {
+    width: 100%;
+    border: none;
+    background: none;
+    font-size: 16px;
+    outline: none;
+}
+
+.store-item {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.store-logo {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    object-fit: contain;
+    border: 1px solid #eee;
+}
+
+.store-details {
+    flex-grow: 1;
+}
+
+.store-details p {
+    margin: 0;
+    line-height: 1.4;
+}
+
+.store-details .sale-time {
+    color: red;
+    font-weight: bold;
+    font-size: 0.9em;
+}
+
+.store-details .store-name {
+    font-weight: bold;
+    font-size: 1.1em;
+    color: #333;
+}
+
+.store-details .store-distance {
+    font-size: 0.9em;
+    color: #666;
+}
+
+.congestion-info {
+    text-align: center;
+}
+
+.congestion-info p {
+    margin: 0;
+}
+
+.congestion-info .congestion-label {
+    font-size: 0.8em;
+    color: #555;
+}
+
+.congestion-info .congestion-value {
+    font-size: 1.2em;
+    font-weight: bold;
+    color: #333;
+}
+
