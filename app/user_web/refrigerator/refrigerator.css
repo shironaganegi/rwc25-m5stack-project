@@ -1,0 +1,95 @@
+.search-section {
+    padding: 20px;
+    background-color: #f8f8f8; 
+    border-bottom: 1px solid #e0e0e0;
+}
+.refrigerator-image-section {
+    text-align: center;
+    padding: 20px 0;
+    background-color: white;
+}
+.fridge-main-title {
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin: 0 0 15px 0;
+}
+.refrigerator-image {
+    max-width: 40%;
+    text-align: center;
+    height: auto;
+    border: 4px solid #ffd700;
+}
+.item-list-section {
+    padding: 20px;
+}
+.list-header {
+    display: flex;
+    justify-content: space-between;
+    padding: 0 10px;
+    font-weight: bold;
+    color: #555;
+    margin-bottom: 10px;
+}
+.list-header .header-shelf {
+    width: 60px;
+    text-align: left;
+    font-size: 1.5rem;
+}
+.list-header .header-details {
+    flex-grow: 1;
+    padding-left: 20px;
+}
+.list-header .header-price {
+    width: 60px;
+    text-align: right;
+}
+.items-container {
+    background-color: white;
+    border-radius: 8px;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.fridge-item {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 10px 0;
+    border-bottom: 1px solid #f0f0f0;
+}
+.fridge-item:last-child {
+    border-bottom: none;
+}
+.fridge-item .item-image {
+    width: 60px;
+    height: 60px;
+    object-fit: contain;
+    background-color: #f8f8f8;
+    border-radius: 8px;
+}
+.fridge-item .item-details {
+    flex-grow: 1;
+}
+.fridge-item .item-details p {
+    margin: 0;
+    font-size: 0.9em;
+    line-height: 1.4;
+}
+.fridge-item .item-details .item-brand {
+    font-size: 0.8em;
+    color: #666;
+}
+.fridge-item .item-details .item-name {
+    font-weight: bold;
+}
+.fridge-item .item-details .item-info {
+    font-size: 0.8em;
+    color: #666;
+}
+.fridge-item .item-price {
+    width: 60px;
+    font-weight: bold;
+    text-align: right;
+    font-size: 1.1em;
+}

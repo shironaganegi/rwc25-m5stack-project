@@ -1,0 +1,48 @@
+.search-section {
+    padding: 20px;
+    background-color: white;
+}
+.favorites-search .search-arrow {
+    color: #f5c518;
+    font-weight: bold;
+    font-size: 20px;
+    margin-right: 8px;
+    padding: 0 5px;
+}
+.favorites-section {
+    padding: 20px;
+    background-color: white;
+}
+.favorites-title {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-top: 0;
+    margin-bottom: 20px;
+}
+.store-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+.food-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr); /* 4列のグリッド */
+    gap: 15px;
+}
+.food-item {
+    text-align: center;
+}
+.food-item img {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    border-radius: 50%; /* 画像を円形にする */
+    background-color: #eee;
+    margin-bottom: 8px;
+}
+.food-item p {
+    margin: 0;
+    font-weight: 500;
+    font-size: 0.9em;
+}
