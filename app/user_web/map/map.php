@@ -167,19 +167,29 @@
             maxZoom: 19
         }).addTo(map);
 
-        // 店舗データ（実際のデータに置き換え可能）
-        var stores = [
-            {
-                name: 'ライフ八戸ノ里店',
-                lat: 34.662625,
-                lng: 135.589097,
-                distance: '2.3km',
-                saleTime: '17:00~',
-                congestion: '23%',
-                saleInfo: 'セール中',
-                category: 'supermarket'
-            },
-        ];
+        // 店舗データを外部JSONから取得
+        var stores = [];
+        fetch('/map/stores.json')
+            .then(response => response.json())
+            .then(data => {
+                stores = data;
+                // ここでstoresデータを使った処理を行う
+                stores.forEach(function(store) {
+                    var icon = store.category === 'supermarket' ? supermarketIcon : pharmacyIcon;
+                    L.marker([store.lat, store.lng], { icon: icon })
+                        .addTo(map)
+                        .bindPopup(
+                            '<b>' + store.name + '</b><br>' +
+                            '距離: ' + store.distance + '<br>' +
+                            'セール時間: ' + store.saleTime + '<br>' +
+                            '混雑度: ' + store.congestion + '<br>' +
+                            'セール情報: ' + store.saleInfo
+                        );
+                });
+            })
+            .catch(error => {
+                console.error('店舗データの取得に失敗しました:', error);
+            });
 
         // カスタムアイコンの作成
         var supermarketIcon = L.divIcon({
