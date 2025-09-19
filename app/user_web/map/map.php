@@ -271,7 +271,7 @@
             });
             
             var filteredStores = stores.filter(function(store) {
-                return parseInt(store.congestion) <= congestionLimit;
+                return parseFloat(store.congestion.replace('%', '')) <= congestionLimit;
             });
             
             filteredStores.forEach(function(store) {
