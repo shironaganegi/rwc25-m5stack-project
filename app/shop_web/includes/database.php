@@ -202,11 +202,11 @@ class Database {
     /**
      * 商品を追加
      */
-    public function addProduct($name, $category_id, $price, $stock_quantity, $description = '') {
+    public function addProduct($name, $category_id, $regular_price, $stock_quantity, $description = '') {
         return $this->insert("
-            INSERT INTO products (name, category_id, price, stock_quantity, description) 
+            INSERT INTO products (name, category_id, regular_price, stock_quantity, description) 
             VALUES (?, ?, ?, ?, ?)
-        ", [$name, $category_id, $price, $stock_quantity, $description]);
+        ", [$name, $category_id, $regular_price, $stock_quantity, $description]);
     }
     
     /**
