@@ -619,7 +619,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_sale'])) {
                                         <div class="product-name"><?= htmlspecialchars($product['name']) ?></div>
                                         <div class="product-details">
                                             <span class="stock-warning">残り<?= $product['stock_quantity'] ?>個</span> | 
-                                            価格: ¥<?= number_format($product['price']) ?> | 
+                                            価格: ¥<?= number_format($product['regular_price']) ?> | 
                                             <?= htmlspecialchars($product['category_name'] ?? 'カテゴリなし') ?>
                                         </div>
                                     </div>
