@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Bootstrap 5 Sample Site</title>
+    <!-- Bootstrap 5（最新系）CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+      /* ちょっとだけ見た目を整えるためのカスタムCSS */
+      body { scroll-behavior: smooth; }
+      .hero-illustration {
+        max-width: 420px;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- ナビゲーションバー -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+      <div class="container">
+        <a class="navbar-brand" href="#">Site of Takahashi</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+          <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+            <li class="nav-item"><a class="nav-link active" aria-current="page" href="#home">Home</a></li>
+            <li class="nav-item"><a class="nav-link" href="#features">Features</a></li>
+            <li class="nav-item"><a class="nav-link" href="#pricing">Pricing</a></li>
+            <li class="nav-item"><a class="nav-link" href="#contact">Contact</a></li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Jumbotron の最新相当（Bootstrap 5では jumbotron が廃止。Heroセクションとして .bg-body-tertiary を使用）-->
+    <section id="home" class="py-5 bg-body-tertiary border-bottom">
+      <div class="container py-5">
+        <div class="row align-items-center g-5">
+          <div class="col-12 col-lg-7">
+            <h1 class="display-5 fw-bold mb-3">stronger, genius.</h1>
+            <p class="lead mb-4">Bootstrap 5 を使ったモダンな高橋のwebサイトです。高橋は天才です。</p>
+            <div class="d-flex gap-2">
+              <a href="#features" class="btn btn-primary btn-lg">Get Started</a>
+              <a href="#pricing" class="btn btn-outline-secondary btn-lg">See Pricing</a>
+            </div>
+          </div>
+          <div class="col-12 col-lg-5 text-center">
+            <!-- デモ用イラスト（Placeholders） -->
+            <img class="img-fluid hero-illustration" src="https://placehold.co/800x600/svg?text=Hero+Image" alt="Hero Illustration" />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Features セクション -->
+    <section id="features" class="py-5">
+      <div class="container">
+        <div class="text-center mb-5">
+          <h2 class="fw-bold">member</h2>
+          <p class="text-muted">我がチームのメンバーたちを紹介します</p>
+        </div>
+        <div class="row g-4">
+          <div class="col-12 col-md-6 col-lg-4">
+            <div class="card h-100 shadow-sm">
+              <div class="card-body">
+                <h5 class="card-title">藤田</h5>
+                <p class="card-text">グリッドシステムでスマホからデスクトップまで最適化。クラスを切り替えるだけでレイアウトが自在に。</p>
+                <a href="#" class="card-link">Learn more</a>
+              </div>
+            </div>
+          </div>
+          <div class="col-12 col-md-6 col-lg-4">
+            <div class="card h-100 shadow-sm">
+              <div class="card-body">
+                <h5 class="card-title">Utility First</h5>
+                <p class="card-text">余白、色、表示制御などのユーティリティクラスで素早くスタイル調整。独自CSSは最小限に。</p>
+                <a href="#" class="card-link">Learn more</a>
+              </div>
+            </div>
+          </div>
+          <div class="col-12 col-md-6 col-lg-4">
+            <div class="card h-100 shadow-sm">
+              <div class="card-body">
+                <h5 class="card-title">Accessible</h5>
+                <p class="card-text">ARIA属性やコントラストに配慮したデフォルト。アクセシブルなUIを簡単に。</p>
+                <a href="#" class="card-link">Learn more</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Pricing セクション -->
+    <section id="pricing" class="py-5 bg-light border-top border-bottom">
+      <div class="container">
+        <div class="text-center mb-5">
+          <h2 class="fw-bold">Pricing</h2>
+          <p class="text-muted">シンプルなプラン例です。実際の価格や機能は適宜変更してください。</p>
+        </div>
+        <div class="row g-4">
+          <div class="col-12 col-md-4">
+            <div class="card h-100 shadow-sm">
+              <div class="card-header text-center">Free</div>
+              <div class="card-body text-center">
+                <h3 class="card-title">$0</h3>
+                <ul class="list-unstyled mt-3 mb-4">
+                  <li>基本機能</li>
+                  <li>メールサポート</li>
+                  <li>1ユーザー</li>
+                </ul>
+                <a href="#" class="btn btn-outline-primary">Sign up</a>
+              </div>
+            </div>
+          </div>
+          <div class="col-12 col-md-4">
+            <div class="card h-100 shadow-sm border-primary">
+              <div class="card-header text-center bg-primary text-white">Pro</div>
+              <div class="card-body text-center">
+                <h3 class="card-title">$19</h3>
+                <ul class="list-unstyled mt-3 mb-4">
+                  <li>高度な機能</li>
+                  <li>優先サポート</li>
+                  <li>3ユーザー</li>
+                </ul>
+                <a href="#" class="btn btn-primary">Get started</a>
+              </div>
+            </div>
+          </div>
+          <div class="col-12 col-md-4">
+            <div class="card h-100 shadow-sm">
+              <div class="card-header text-center">Enterprise</div>
+              <div class="card-body text-center">
+                <h3 class="card-title">Contact</h3>
+                <ul class="list-unstyled mt-3 mb-4">
+                  <li>カスタム機能</li>
+                  <li>専任サポート</li>
+                  <li>無制限ユーザー</li>
+                </ul>
+                <a href="#contact" class="btn btn-outline-secondary">Contact us</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Contact セクション（フォームの例） -->
+    <section id="contact" class="py-5">
+      <div class="container">
+        <div class="row justify-content-center">
+          <div class="col-12 col-lg-8">
+            <h2 class="fw-bold mb-4 text-center">Contact</h2>
+            <form class="row g-3">
+              <div class="col-md-6">
+                <label for="inputName" class="form-label">お名前</label>
+                <input type="text" class="form-control" id="inputName" placeholder="山田 太郎" />
+              </div>
+              <div class="col-md-6">
+                <label for="inputEmail" class="form-label">メールアドレス</label>
+                <input type="email" class="form-control" id="inputEmail" placeholder="name@example.com" />
+              </div>
+              <div class="col-12">
+                <label for="inputMessage" class="form-label">メッセージ</label>
+                <textarea class="form-control" id="inputMessage" rows="4" placeholder="お問い合わせ内容をお書きください"></textarea>
+              </div>
+              <div class="col-12 text-end">
+                <button type="submit" class="btn btn-primary">送信</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- フッター -->
+    <footer class="py-4 bg-dark text-white-50">
+      <div class="container text-center">
+        <small>© 2025 Site of Takahasi. Built with Bootstrap 5.</small>
+      </div>
+    </footer>
+
+    <!-- Bootstrap JS（Bundle版：Popper含む） -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  </body>
+</html>
