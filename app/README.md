@@ -13,6 +13,26 @@
 - **レスポンシブデザイン**: モバイル対応
 - **フィルタリング**: 混雑率による絞り込み
 
+## 🗄️ データベース構造
+
+このアプリケーションは `supermarket_app` データベースを使用します。
+
+### テーブル構成
+- **users**: ユーザー（店舗スタッフ）情報
+- **categories**: 商品カテゴリ
+- **products**: 商品情報（価格、在庫など）
+- **sales**: セール情報（割引、期間など）
+- **sales_data**: 売上実績データ
+- **sales_targets**: 売上目標設定
+- **notification_settings**: 通知設定
+
+### サンプルデータ
+初期データとして以下が自動作成されます：
+- 管理ユーザー（admin/admin@supermarket.com）
+- 5つの基本カテゴリ（食品、飲料、日用品、冷凍食品、お菓子）
+- 5つのサンプル商品
+- 日次売上目標（¥580,000）
+
 ## 環境設定
 
 ### 1. 環境変数の設定
@@ -27,12 +47,34 @@ cp .env.example .env
 docker-compose up -d
 ```
 
-### 3. マップページへのアクセス
+### 3. データベース動作確認
 ```
-http://localhost:8888/map/map.php
+http://localhost:8000/test_db.php
+```
+
+### 4. マップページへのアクセス
+```
+http://localhost:8000/map/map.php
 ```
 
 ## 開発者向け情報
+
+### データベース接続
+`/includes/database.php`ファイルでデータベース操作を統一管理：
+
+```php
+// データベース接続
+$db = Database::getInstance();
+
+// 全商品取得
+$products = $db->getAllProducts();
+
+// カテゴリ別商品取得
+$products = $db->getProductsByCategory(1);
+
+// アクティブなセール取得
+$sales = $db->getActiveSales();
+```
 
 ### マップ実装の詳細
 - **OpenStreetMap**: オープンソースの地図データ
@@ -60,18 +102,25 @@ http://localhost:8888/map/map.php
 - マーカーアイコンの色やスタイルの変更
 - ポップアップ表示内容のカスタマイズ
 - フィルタリング条件の追加
+- データベースからの動的データ取得
 
 ## セキュリティと運用
 
 ### 依存関係
-- **外部API**: なし
+- **外部API**: なし（OpenStreetMapのみ）
 - **外部認証**: なし  
 - **課金**: なし
 - **制限**: なし
 
+### データベース設定
+- **ホスト**: localhost:53306
+- **データベース名**: supermarket_app
+- **文字セット**: utf8mb4
+- **照合順序**: utf8mb4_unicode_ci
+
 ### データ更新
 店舗情報は現在JavaScript内にハードコーディングされています。
-将来的にはデータベースやAPIとの連携も可能です。
+データベースと連携して動的な情報表示も実装可能です。
 
 ## 開発者向け
 新しい環境変数を追加した場合は、`.env.example`ファイルも同時に更新してください。
