@@ -522,7 +522,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_sale'])) {
                             <option value="">商品を選択してください</option>
                             <?php foreach ($allProducts as $product): ?>
                                 <option value="<?= $product['id'] ?>">
-                                    <?= htmlspecialchars($product['name']) ?> (¥<?= number_format($product['price']) ?>)
+                                    <?= htmlspecialchars($product['name']) ?> (¥<?= number_format($product['regular_price']) ?>)
                                 </option>
                             <?php endforeach; ?>
                         </select>
