@@ -1,3 +1,16 @@
+<?php
+// レシピデータを配列で定義
+$recipes = [
+    ['id' => 1, 'name' => 'ハンバーグ', 'image' => '/assets/image/recipe.png'],
+    ['id' => 2, 'name' => 'ムニエル', 'image' => '/assets/image/meuniere.png'],
+    ['id' => 3, 'name' => 'チャーハン', 'image' => '/assets/image/chahan.png'],
+    ['id' => 4, 'name' => '生姜焼き', 'image' => '/assets/image/shogayaki.png'],
+    ['id' => 5, 'name' => '肉じゃが', 'image' => '/assets/image/nikujaga.png'],
+    ['id' => 6, 'name' => 'カレー', 'image' => '/assets/image/curry.png'],
+    // 麻婆豆腐を追加
+    ['id' => 7, 'name' => '麻婆豆腐', 'image' => '/assets/image/mapo-tofu.png'], // 画像パスは後で配置するファイル名に合わせます
+];
+?>
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -23,30 +36,12 @@
 
         <section class="recipe-list-section">
             <div class="recipe-grid">
-                <a href="hamburg_recipe.html" class="recipe-item">
-                    <img src="/assets/image/hamburg.png" alt="ハンバーグ">
-                    <p>ハンバーグ</p>
-                </a>
-                <a href="meuniere_recipe.html" class="recipe-item">
-                    <img src="/assets/image/meuniere.png" alt="ムニエル">
-                    <p>ムニエル</p>
-                </a>
-                <a href="chahan_recipe.html" class="recipe-item">
-                    <img src="/assets/image/chahan.png" alt="チャーハン">
-                    <p>チャーハン</p>
-                </a>
-                <a href="shogayaki_recipe.html" class="recipe-item">
-                    <img src="/assets/image/shogayaki.png" alt="生姜焼き">
-                    <p>生姜焼き</p>
-                </a>
-                <a href="nikujaga_recipe.html" class="recipe-item">
-                    <img src="/assets/image/nikujaga.png" alt="じゃが肉">
-                    <p>じゃが肉</p>
-                </a>
-                <a href="curry_recipe.html" class="recipe-item">
-                    <img src="/assets/image/curry.png" alt="カレー">
-                    <p>カレー</p>
-                </a>
+                <?php foreach ($recipes as $recipe): ?>
+                    <a href="/recipe/recipe_detail.php?id=<?php echo htmlspecialchars($recipe['id'], ENT_QUOTES, 'UTF-8'); ?>" class="recipe-item">
+                        <img src="<?php echo htmlspecialchars($recipe['image'], ENT_QUOTES, 'UTF-8'); ?>" alt="<?php echo htmlspecialchars($recipe['name'], ENT_QUOTES, 'UTF-8'); ?>">
+                        <p><?php echo htmlspecialchars($recipe['name'], ENT_QUOTES, 'UTF-8'); ?></p>
+                    </a>
+                <?php endforeach; ?>
             </div>
         </section>
     </main>

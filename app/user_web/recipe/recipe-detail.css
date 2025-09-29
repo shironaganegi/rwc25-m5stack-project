@@ -1,0 +1,105 @@
+
+.recipe-detail-container {
+    padding-bottom: 20px;
+}
+
+.recipe-title-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 15px 20px;
+    background-color: #fff;
+    border-bottom: 4px solid #ffd700;
+}
+
+.recipe-title-container h1 {
+    font-size: 1.8rem;
+    margin: 0;
+}
+
+.recipe-time {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #333;
+    white-space: nowrap;
+}
+
+.recipe-main-image {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+.recipe-content-grid {
+    padding: 20px;
+    background-color: #fff;
+}
+
+.materials-section h2, .steps-section h2 {
+    font-size: 1.3rem;
+    margin: 0 0 15px 0;
+}
+
+.materials-section {
+    border-left: 5px solid #ffd700;
+    padding-left: 15px;
+}
+
+.materials-section ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.materials-section li {
+    padding: 12px 0;
+    border-bottom: 1px solid #eee;
+    font-size: 1rem;
+}
+
+.materials-section li:first-child {
+    border-top: 1px solid #eee;
+}
+
+/* レスポンシブ対応: PCでは横並び */
+@media (min-width: 768px) {
+    .recipe-content-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 40px;
+    }
+}
+
+.steps-section {
+    margin-top: 30px;
+}
+
+.steps-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.arrow-icon {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #ffd700;
+}
+
+.step-video-container video {
+    width: 100%;
+    border-radius: 8px;
+    margin-bottom: 10px;
+}
+
+.step-video-container p {
+    margin: 0;
+    line-height: 1.6;
+}
+
+.error-message {
+    text-align: center;
+    padding: 50px 20px;
+    font-size: 1.1rem;
+    color: #555;
+}
