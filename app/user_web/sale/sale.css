@@ -1,12 +1,7 @@
+/* --- 既存のスタイルは省略 --- */
 .sale-header-section {
     padding: 20px;
     background-color: white;
-}
-.sale-main-title {
-    text-align: center;
-    font-size: 1.2rem;
-    font-weight: bold;
-    margin: 0 0 15px 0;
 }
 .add-store-button {
     display: block;
@@ -30,7 +25,7 @@
     flex-direction: column;
     gap: 15px;
 }
-.sale-store-link {
+.sale-store-header { /* sale-store-linkから名前変更 */
     display: flex;
     align-items: center;
     gap: 20px;
@@ -40,6 +35,11 @@
     border-radius: 8px;
     text-decoration: none;
     color: #333;
+    cursor: pointer; /* クリックできることを示す */
+    transition: background-color 0.2s;
+}
+.sale-store-header:hover, .sale-store-header.active {
+    background-color: #f7f7f7;
 }
 .sale-store-logo {
     width: 50px;
@@ -49,4 +49,80 @@
 .sale-store-name {
     font-size: 1.1rem;
     font-weight: 500;
+}
+
+/* --- ここから追加するスタイル --- */
+
+.sale-items-panel {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-out;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-top: none;
+    border-radius: 0 0 8px 8px;
+    padding: 0 15px;
+}
+.panel-header {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+    margin: 0 5px;
+    font-size: 0.8rem;
+    color: #555;
+    font-weight: bold;
+    border-bottom: 1px solid #eee;
+}
+.panel-header span:first-child {
+    flex-grow: 1;
+    margin-left: 65px; /* 画像の分スペースを空ける */
+}
+.sale-item-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+.sale-item {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 10px 0;
+    border-bottom: 1px solid #eee;
+}
+.sale-item:last-child {
+    border-bottom: none;
+}
+.sale-item-image {
+    width: 50px;
+    height: 50px;
+    object-fit: cover;
+    border-radius: 8px;
+    background-color: #f0f0f0;
+}
+.sale-item-details {
+    flex-grow: 1;
+}
+.sale-item-details .price {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: bold;
+}
+.price .price-old {
+    font-size: 0.8em;
+    color: #888;
+    text-decoration: line-through;
+    margin-right: 5px;
+}
+.price .price-arrow {
+    color: red;
+    margin: 0 5px;
+}
+.price .price-new {
+    color: red;
+    font-size: 1.2em;
+}
+.sale-item-time {
+    font-size: 0.9rem;
+    font-weight: bold;
+    color: red;
 }
