@@ -19,7 +19,6 @@ if ($meal_id) {
     }
 }
 
-// 材料と分量を整形する
 $ingredients = [];
 if ($recipe) {
     for ($i = 1; $i <= 20; $i++) {
@@ -66,6 +65,26 @@ $page_title = $recipe ? htmlspecialchars($recipe['strMeal'] ?? 'レシピ詳細'
                         <p class="instructions"><?php echo nl2br(htmlspecialchars($recipe['strInstructions'] ?? '')); ?></p>
                     </div>
                 </div>
+
+                <?php if (!empty($recipe['strYoutube'])): ?>
+                    <div class="youtube-section">
+                        <h2>Video</h2>
+                        <div class="video-container">
+                            <?php
+                            $youtube_url = $recipe['strYoutube'];
+                            $embed_url = str_replace('watch?v=', 'embed/', $youtube_url);
+                            ?>
+                            <iframe 
+                                src="<?php echo htmlspecialchars($embed_url); ?>" 
+                                title="YouTube video player for <?php echo htmlspecialchars($recipe['strMeal']); ?>" 
+                                frameborder="0" 
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                                allowfullscreen>
+                            </iframe>
+                        </div>
+                    </div>
+                <?php endif; ?>
+
             </div>
         <?php else: ?>
             <p class="error-message">レシピが見つかりませんでした。</p>

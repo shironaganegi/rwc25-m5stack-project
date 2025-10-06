@@ -7,7 +7,7 @@ $recipes_data = [];
 $unique_ids = []; // 重複を避けるためのIDリスト
 
 // 50件のユニークなレシピを取得するまでループ
-while (count($recipes_data) < 5) {
+while (count($recipes_data) < 200) {
     $api_url = 'https://www.themealdb.com/api/json/v1/1/random.php';
     $json_data = @file_get_contents($api_url);
 
@@ -23,13 +23,10 @@ while (count($recipes_data) < 5) {
             }
         }
     }
-    usleep(200000); // サーバー負荷軽減のため0.2秒待機
+    usleep(200000);
 }
 
 $json_file_path = __DIR__ . '/recipes.json';
-
-// 取得したレシピデータをJSON形式でファイルに保存
-// JSON_PRETTY_PRINTで見やすい形式に、JSON_UNESCAPED_UNICODEで日本語の文字化けを防ぐ
 file_put_contents($json_file_path, json_encode($recipes_data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
 
 echo "\n完了！ " . count($recipes_data) . "件のレシピを 'recipes.json' に保存しました。\n";
