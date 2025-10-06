@@ -1,0 +1,235 @@
+/* style.css */
+
+/* --- 全体レイアウト --- */
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+    margin: 0;
+    background-color: #f0f0f0;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+.container {
+    padding: 15px;
+    flex-grow: 1;
+    padding-bottom: 70px; /* フッターの高さ分を確保 */
+}
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+/* --- ヘッダーとハンバーガーメニュー --- */
+header {
+    background-color: white;
+    padding: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid #eee;
+    position: relative;
+    z-index: 100;
+}
+.hamburger-menu {
+    cursor: pointer;
+    width: 30px;
+    height: 24px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px;
+}
+.hamburger-menu span {
+    display: block;
+    width: 100%;
+    height: 3px;
+    background-color: #333;
+    border-radius: 2px;
+    transition: all 0.3s ease;
+}
+.header-title {
+    flex-grow: 1;
+    text-align: center;
+    font-size: 20px;
+    font-weight: bold;
+    color: #333;
+    margin-right: 30px;
+}
+.header-right-spacer {
+    width: 30px;
+}
+
+/* --- カードスタイル（ホーム・分析） --- */
+.card {
+    background-color: white;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 10px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+.card-content {
+    font-size: 24px;
+    font-weight: bold;
+    color: #28a745; /* 緑色 */
+    margin-top: 5px;
+}
+.card-sub-content {
+    font-size: 14px;
+    color: #777;
+}
+
+/* --- フォームスタイル（入力画面） --- */
+.form-group {
+    margin-bottom: 15px;
+}
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-size: 14px;
+    color: #333;
+    font-weight: bold;
+}
+.form-input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-sizing: border-box;
+    font-size: 16px;
+    background-color: white;
+}
+.input-group {
+    display: flex;
+    gap: 10px;
+}
+.input-group .form-input {
+    flex-grow: 1;
+}
+.input-group span {
+    display: flex;
+    align-items: center;
+    font-size: 16px;
+    color: #555;
+}
+textarea.form-input {
+    resize: vertical;
+    min-height: 80px;
+}
+.submit-button {
+    padding: 12px 20px;
+    background-color: #28a745; /* 画像のボタンの色 */
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    width: 100%;
+    box-sizing: border-box;
+    font-size: 16px;
+    transition: background-color 0.2s ease;
+    margin-top: 15px;
+}
+
+/* --- 設定画面メニュー --- */
+.section-title {
+    font-size: 16px;
+    font-weight: bold;
+    color: #555;
+    margin-top: 20px;
+    margin-bottom: 10px;
+}
+.menu-item {
+    background-color: white;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 10px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    display: block;
+    text-decoration: none;
+    color: #333;
+    font-size: 16px;
+    position: relative;
+}
+.menu-item::after { /* 右側の矢印を表現 */
+    content: '>';
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #bbb;
+}
+.menu-item:active {
+    background-color: #f0f0f0;
+}
+
+/* --- フッターナビゲーション --- */
+footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: white;
+    border-top: 1px solid #eee;
+    display: flex;
+    justify-content: space-around;
+    padding: 5px 0;
+    width: 100%;
+    box-shadow: 0 -2px 5px rgba(0,0,0,0.05);
+    z-index: 100;
+}
+.nav-item {
+    text-align: center;
+    color: #777;
+    text-decoration: none;
+    font-size: 12px;
+    flex-basis: 25%;
+    padding: 5px 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+.nav-item.active {
+    color: #333; /* アクティブは濃い色 */
+}
+.nav-item img {
+    display: block;
+    margin: 0 auto 5px;
+    height: 24px;
+    width: 24px;
+    filter: grayscale(100%);
+}
+.nav-item.active img {
+    filter: none;
+}
+
+/* --- サイドナビゲーションとオーバーレイ（ハンバーガーメニュー） --- */
+.side-navigation {
+    position: fixed;
+    top: 0;
+    left: -250px;
+    width: 250px;
+    height: 100%;
+    background-color: #fff;
+    box-shadow: 2px 0 5px rgba(0,0,0,0.2);
+    transition: left 0.3s ease;
+    z-index: 99;
+    padding-top: 60px;
+    overflow-y: auto;
+}
+.side-navigation.open {
+    left: 0;
+}
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+    z-index: 98;
+    display: none;
+}
+.overlay.active {
+    display: block;
+}
