@@ -2,8 +2,6 @@
 $page_title = "分析結果";
 $active_nav = "分析";
 include '../includes/header.php';
-
-// --- ページ固有のコンテンツ ---
 ?>
     <div style="margin-bottom: 15px;">
       <label for="period_select" style="font-size: 14px;">期間選択</label>
@@ -19,7 +17,7 @@ include '../includes/header.php';
         <div class="card-sub-content" style="text-align: center;">前月比 +15%</div>
     </div>
     
-    <div class="card" style="height: 200px; text-align: center; display: flex; align-items: center; justify-content: center;">
+    <div class="card" style="height: 100px; text-align: center; display: flex; align-items: center; justify-content: center;">
         <p class="card-sub-content">日別売上推移<br>(グラフ表示)</p>
     </div>
     

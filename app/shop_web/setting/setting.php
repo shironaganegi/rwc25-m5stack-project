@@ -2,8 +2,6 @@
 $page_title = "設定";
 $active_nav = "設定";
 include '../includes/header.php';
-
-// --- ページ固有のコンテンツ ---
 ?>
     <div class="section-title">アカウント設定</div>
     <a href="#" class="menu-item">プロフィール編集</a>
