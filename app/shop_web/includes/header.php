@@ -21,10 +21,10 @@
 
     <nav class="side-navigation" id="sideNavigation">
         <ul>
-            <li><a href="../home/index.php">ホーム</a></li>
-            <li><a href="../analys/index.php">分析</a></li>
-            <li><a href="../saleinput/index.php">入力</a></li>
-            <li><a href="../setting/index.php">設定</a></li>
+            <li><a href="../home/home.php">ホーム</a></li>
+            <li><a href="../analys/analys.php">分析</a></li>
+            <li><a href="../saleInput/saleInput.php">入力</a></li>
+            <li><a href="../setting/setting.php">設定</a></li>
             <li><a href="#">商品管理</a></li>
             <li><a href="#">お知らせ</a></li>
         </ul>
