@@ -5,10 +5,10 @@ from hardware import I2C, Pin
 from unit import QRCodeUnit 
 
 # --- 定数定義 ---
-COLOR_BACKGROUND = 0x333333
+COLOR_BACKGROUND = 0x000000 # 黒
 COLOR_LABEL_TEXT = 0xFFFFFF
 COLOR_LABEL_BG = COLOR_BACKGROUND
-COLOR_BUTTON_NORMAL = 0x000000
+COLOR_BUTTON_NORMAL = 0x222222 # 背景より少し明るい色
 COLOR_BUTTON_PRESSED = 0x5A5A5A
 COLOR_BUTTON_BORDER = 0xFFFFFF
 COLOR_BUTTON_TEXT = 0xFFFFFF
@@ -17,12 +17,14 @@ STATE_HOME = 0
 STATE_SCANNER = 1
 
 QR_UNIT_ADDR = 0x21
-MAX_LIST_ITEMS = 6 # 画面に表示する箇条書きの最大行数
+MAX_LIST_ITEMS = 6
 
 class QRCodeScannerApp:
     
     def __init__(self):
         M5.begin()
+        Speaker.setVolume(20) 
+
         self.current_state = STATE_HOME
         self.is_continuous_mode = False
         self.scanned_items = []
@@ -42,8 +44,8 @@ class QRCodeScannerApp:
             {"text": "Scan", "x": 110, "y": 200, "w": 90, "h": 35, 
              "action": self._on_trigger_button_click, "is_pressed": False, 
              "rect_obj": None, "label_obj": None, "font": Widgets.FONTS.DejaVu18},
-            {"text": "Home", "x": 210, "y": 200, "w": 100, "h": 35, 
-             "action": self._on_home_button_click, "is_pressed": False, 
+            {"text": "Clear", "x": 210, "y": 200, "w": 100, "h": 35, 
+             "action": self._on_clear_button_click, "is_pressed": False, 
              "rect_obj": None, "label_obj": None, "font": Widgets.FONTS.DejaVu18}
         ]
 
@@ -57,16 +59,9 @@ class QRCodeScannerApp:
         self._show_home_screen()
 
     def _setup_ui(self):
-        """UI部品を作成"""
-        # ★★★ 変更点: fillScreen はここでは実行しない ★★★
-        # (画面切り替え時に実行するため、起動時のゴースト発生を防ぐ)
-        
-        # --- ホーム画面の部品 ---
-        # ★★★ 変更点: タイトルのサイズと位置を調整 ★★★
         self.home_title = Widgets.Label("QR Scanner", 20, 60, 1.5, COLOR_LABEL_TEXT, COLOR_LABEL_BG, Widgets.FONTS.DejaVu24)
         self._create_manual_buttons(self.home_buttons)
         
-        # --- スキャン画面の部品 ---
         self.scanner_mode_label = Widgets.Label("Mode: Manual", 10, 5, 1.0, 0xFFFF00, COLOR_BACKGROUND, Widgets.FONTS.DejaVu18)
         
         list_start_y = 30
@@ -113,9 +108,7 @@ class QRCodeScannerApp:
         M5.Lcd.setCursor(20, 120); M5.Lcd.print(line2)
         while True: time.sleep(1)
 
-    # --- 画面切り替えメソッド ---
     def _hide_all_widgets(self):
-        """すべてのUIウィジェットを非表示にする (setVisible)"""
         self.home_title.setVisible(False)
         for btn_data in self.home_buttons:
             btn_data["rect_obj"].setVisible(False); btn_data["label_obj"].setVisible(False)
@@ -129,11 +122,7 @@ class QRCodeScannerApp:
 
     def _show_home_screen(self):
         self._hide_all_widgets()
-        
-        # ★★★ 変更点: 画面を背景色で塗り直し、ゴーストを消す ★★★
         M5.Lcd.fillScreen(COLOR_BACKGROUND)
-        
-        # ホーム画面の部品だけを表示
         self.home_title.setVisible(True)
         for btn_data in self.home_buttons:
             btn_data["rect_obj"].setVisible(True); btn_data["label_obj"].setVisible(True)
@@ -141,17 +130,12 @@ class QRCodeScannerApp:
 
     def _show_scanner_screen(self):
         self._hide_all_widgets()
-        
-        # ★★★ 変更点: 画面を背景色で塗り直し、ゴーストを消す ★★★
         M5.Lcd.fillScreen(COLOR_BACKGROUND)
-        
-        # スキャン画面の部品だけを表示
         self.scanner_mode_label.setVisible(True)
         for label in self.data_labels:
             label.setVisible(True)
         for btn_data in self.scan_buttons:
             btn_data["rect_obj"].setVisible(True); btn_data["label_obj"].setVisible(True)
-            
         self.current_state = STATE_SCANNER
         self._update_scanner_ui_for_mode()
         self._update_data_display()
@@ -167,7 +151,6 @@ class QRCodeScannerApp:
             scan_btn["rect_obj"].setVisible(True)
             scan_btn["label_obj"].setVisible(True)
 
-    # --- アクションメソッド (ボタン動作) ---
     def _on_start_button_click(self):
         self._show_scanner_screen()
 
@@ -185,25 +168,40 @@ class QRCodeScannerApp:
         try:
             self.qrcode.set_manual_scan(1)
             self.scanner_mode_label.setText("Triggered...")
+
+            timeout = time.time() + 1
+            data_found = False
+            while time.time() < timeout:
+                if self.qrcode.get_qrcode_data_status():
+                    self._read_and_display_data()
+                    data_found = True
+                    break
+                time.sleep_ms(50)
+            
+            self.scanner_mode_label.setText("Mode: Manual")
+            
         except Exception as e:
             print(f"手動トリガーに失敗しました: {e}")
             self.scanner_mode_label.setText("Trigger Error!")
 
-    def _on_home_button_click(self):
+    def _on_clear_button_click(self):
         self.scanned_items.clear()
         self._update_data_display()
-        self._show_home_screen()
-            
+
     def _update_button_appearance(self, btn_data, pressed):
         color_bg = COLOR_BUTTON_PRESSED if pressed else COLOR_BUTTON_NORMAL
+        
         btn_data["rect_obj"].setColor(COLOR_BUTTON_BORDER, color_bg)
+        
         btn_data["label_obj"].setColor(COLOR_BUTTON_TEXT, color_bg)
+        
+        btn_data["label_obj"].setText(btn_data["text"])
+
 
     def beep(self):
         Speaker.tone(1200, 80); time.sleep_ms(20); Speaker.tone(1200, 80)
 
     def _update_data_display(self):
-        """内部リスト(scanned_items)の内容を画面のラベルに反映する"""
         num_items = len(self.scanned_items)
         for i in range(MAX_LIST_ITEMS):
             if i < num_items:
@@ -211,9 +209,18 @@ class QRCodeScannerApp:
             else:
                 self.data_labels[i].setText("")
 
-    # --- メイン処理メソッド ---
+    def _read_and_display_data(self):
+        scanned_data = self.qrcode.get_qrcode_data(decode=True)
+        self.qrcode.clear_qrcode_data_status() 
+        
+        if scanned_data and (scanned_data not in self.scanned_items):
+            self.scanned_items.insert(0, scanned_data)
+            if len(self.scanned_items) > MAX_LIST_ITEMS:
+                self.scanned_items.pop()
+                
+            self._update_data_display()
+
     def handle_touch(self):
-        """手動でのタッチ処理"""
         current_touch_count = M5.Touch.getCount()
         if self.last_touch_count != current_touch_count:
             self.last_touch_count = current_touch_count
@@ -236,11 +243,11 @@ class QRCodeScannerApp:
                     if is_inside and not btn_data["is_pressed"]:
                         btn_data["is_pressed"] = True
                         self._update_button_appearance(btn_data, True)
-                        btn_data["action"]()
                         
                         if btn_data["text"] == "Scan":
-                            time.sleep_ms(100)
-                            self.scanner_mode_label.setText("Mode: Manual")
+                            self._on_trigger_button_click()
+                        else:
+                            btn_data["action"]()
             else:
                 for btn_data in button_list:
                     if btn_data["is_pressed"]:
@@ -248,28 +255,22 @@ class QRCodeScannerApp:
                         self._update_button_appearance(btn_data, False)
 
     def handle_qr_reading(self):
-        try:
-            if self.qrcode.get_qrcode_data_status():
-                scanned_data = self.qrcode.get_qrcode_data(decode=True)
-                self.qrcode.clear_qrcode_data_status() 
-                
-                if scanned_data and (scanned_data not in self.scanned_items):
-                    self.scanned_items.insert(0, scanned_data)
-                    if len(self.scanned_items) > MAX_LIST_ITEMS:
-                        self.scanned_items.pop()
-                        
-                    self._update_data_display()
-                    self.beep()
-        except Exception as e:
-            print(f"QRデータの読み取り中にエラーが発生しました: {e}")
+        if self.is_continuous_mode:
+            try:
+                if self.qrcode.get_qrcode_data_status():
+                    self._read_and_display_data()
+            except Exception as e:
+                print(f"QRデータの読み取り中にエラーが発生しました: {e}")
 
     def run(self):
         while True:
             M5.update()
             self.handle_touch()
+            
             if self.current_state == STATE_SCANNER:
                 self.handle_qr_reading()
-            time.sleep_ms(50)
+                
+            time.sleep_ms(10)
 
 if __name__ == '__main__':
     app = QRCodeScannerApp()
