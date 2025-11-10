@@ -123,3 +123,15 @@
 |本番の回線の安定性の低さ|AWSなどにデプロイする|
 
 # 5. 参考リスト
+>M5Stack で MicroPython を使う - https://oka.medium.com/m5stack-で-micropython-を使う-9a03e8be7ce
+>m5stack/uiflow-micropython - GitHub - https://github.com/m5stack/uiflow-micropython
+>【M5Stack】UIFlowとMicroPythonで開発を始める - https://qiita.com/sho11hei12-1998/items/372f6312908db27c4486
+>M5Stack で MicroPython を使う（ + VSCode から M5Stack を操作する） - https://zenn.dev/ksrnnb/articles/25cbd71bef10c7
+>MicroPython libraries - https://docs.micropython.org/en/v1.22.0/library/index.html
+>builtins.list - M5StickC UIFlow - https://lang-ship.com/reference/unofficial/M5StickC_UIFlow/class/builtins.list/
+>Unit - QR CODE - M5Stack - https://uiflow-micropython.readthedocs.io/en/latest/units/qrcode.html
+>【M5Stack】UIFlow (MicroPython) でI2C接続のQRコードリーダー（unit）を使う - https://zenn.dev/yuta_enginner/articles/e09bc7e5d05bac
+>天気情報取得用API - Free Weather API - WeatherAPI.com - https://www.weatherapi.com/
+>天気情報取得用API - Weather API - OpenWeatherMap - https://openweathermap.org/api
+>CoreS3 ファーム書き込み・プログラム配信 - m5-docs - M5Stack - https://docs.m5stack.com/ja/uiflow2/m5cores3/program
+>M5stack用Python統合開発環境 - Thonny - https://thonny.org/
