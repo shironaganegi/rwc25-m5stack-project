@@ -1,58 +1,31 @@
 <?php
+require_once __DIR__ . '/../includes/database.php';
+
 // 検索キーワードを取得
 $search_keyword = trim($_GET['s'] ?? '');
 
-// JSONファイルから全レシピデータを読み込む
-$all_recipes = [];
-$json_file_path = __DIR__ . '/recipes.json';
-if (file_exists($json_file_path)) {
-    $json_data = file_get_contents($json_file_path);
-    $all_recipes = json_decode($json_data, true);
-    if (!is_array($all_recipes)) {
-        $all_recipes = [];
-    }
-}
-
 $recipes_to_display = [];
+$error_message = '';
 
-if (!empty($search_keyword)) {
-    // 【検索時】キーワードでレシピ名と材料をフィルタリング
-    foreach ($all_recipes as $recipe) {
-        $found = false;
+try {
+    $db = Database::getInstance();
 
-        // 1. レシピ名(strMeal)を検索
-        if (isset($recipe['strMeal']) && stristr($recipe['strMeal'], $search_keyword) !== false) {
-            $found = true;
-        }
-
-        // 2. 材料(strIngredient1〜20)を検索
-        if (!$found) {
-            for ($i = 1; $i <= 20; $i++) {
-                $ingredient_key = 'strIngredient' . $i;
-                if (isset($recipe[$ingredient_key]) && !empty($recipe[$ingredient_key])) {
-                    if (stristr($recipe[$ingredient_key], $search_keyword) !== false) {
-                        $found = true;
-                        break; // 材料で見つかったらループを抜ける
-                    }
-                }
-            }
-        }
-
-        // レシピ名か材料のいずれかで見つかった場合、表示リストに追加
-        if ($found) {
-            $recipes_to_display[] = $recipe;
-        }
-    }
-} else {
-    // 【通常時】ランダムに10件選ぶ
-    if (count($all_recipes) > 20) {
-        $random_keys = array_rand($all_recipes, 20);
-        foreach ($random_keys as $key) {
-            $recipes_to_display[] = $all_recipes[$key];
-        }
+    if (!empty($search_keyword)) {
+        // 【検索時】キーワードでレシピ名と材料を検索
+        // DISTINCTを使って重複を除外
+        $sql = "
+            SELECT DISTINCT r.* FROM recipes r 
+            LEFT JOIN recipe_ingredients ri ON r.id = ri.recipe_id 
+            WHERE r.name LIKE ? OR ri.ingredient_name LIKE ?
+        ";
+        $param = "%{$search_keyword}%";
+        $recipes_to_display = $db->select($sql, [$param, $param]);
     } else {
-        $recipes_to_display = $all_recipes;
+        // 【通常時】ランダムに20件選ぶ
+        $recipes_to_display = $db->select("SELECT * FROM recipes ORDER BY RAND() LIMIT 20");
     }
+} catch (Exception $e) {
+    $error_message = "データベースエラー: " . $e->getMessage();
 }
 ?>
 <!DOCTYPE html>
@@ -80,18 +53,20 @@ if (!empty($search_keyword)) {
             <?php if (!empty($recipes_to_display)): ?>
                 <div class="recipe-grid">
                     <?php foreach ($recipes_to_display as $recipe): ?>
-                        <a href="/recipe/recipe_detail.php?id=<?php echo htmlspecialchars($recipe['idMeal'] ?? ''); ?>" class="recipe-item">
-                            <img src="<?php echo htmlspecialchars($recipe['strMealThumb'] ?? ''); ?>/preview" alt="<?php echo htmlspecialchars($recipe['strMeal'] ?? ''); ?>">
-                            <p><?php echo htmlspecialchars($recipe['strMeal'] ?? ''); ?></p>
+                        <a href="/recipe/recipe_detail.php?id=<?php echo htmlspecialchars($recipe['id'] ?? ''); ?>" class="recipe-item">
+                            <img src="<?php echo htmlspecialchars($recipe['thumbnail_url'] ?? ''); ?>/preview" alt="<?php echo htmlspecialchars($recipe['name'] ?? ''); ?>">
+                            <p><?php echo htmlspecialchars($recipe['name'] ?? ''); ?></p>
                         </a>
                     <?php endforeach; ?>
                 </div>
             <?php else: ?>
                 <p class="error-message">
-                    <?php if (!empty($search_keyword)): ?>
+                    <?php if (!empty($error_message)): ?>
+                        <?php echo htmlspecialchars($error_message); ?>
+                    <?php elseif (!empty($search_keyword)): ?>
                         「<?php echo htmlspecialchars($search_keyword); ?>」の検索結果が見つかりませんでした。
                     <?php else: ?>
-                        レシピが見つかりませんでした。「fetch_recipes.php」を再実行してください。
+                        レシピが見つかりませんでした。データベースを確認してください。
                     <?php endif; ?>
                 </p>
             <?php endif; ?>
