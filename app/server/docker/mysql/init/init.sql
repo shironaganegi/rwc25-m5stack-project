@@ -41,6 +41,18 @@ CREATE TABLE products (
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
 );
 
+-- 店舗マスタテーブル（外部キー参照されるため先に定義）
+CREATE TABLE stores (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    address VARCHAR(255),
+    latitude DECIMAL(10, 8),
+    longitude DECIMAL(11, 8),
+    category ENUM('supermarket', 'pharmacy', 'other') DEFAULT 'supermarket',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
 -- セール情報テーブル
 CREATE TABLE sales (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -108,18 +120,6 @@ CREATE TABLE notification_settings (
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
--- 店舗マスタテーブル
-CREATE TABLE stores (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(100) NOT NULL,
-    address VARCHAR(255),
-    latitude DECIMAL(10, 8),
-    longitude DECIMAL(11, 8),
-    category ENUM('supermarket', 'pharmacy', 'other') DEFAULT 'supermarket',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-);
-
 -- ユーザーお気に入り店舗テーブル
 CREATE TABLE user_favorite_stores (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -151,6 +151,38 @@ CREATE TABLE user_refrigerator (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE SET NULL
+);
+
+-- レシピマスタテーブル
+CREATE TABLE recipes (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    external_id VARCHAR(20) UNIQUE NOT NULL COMMENT 'TheMealDB API ID',
+    name VARCHAR(255) NOT NULL,
+    alternate_name VARCHAR(255),
+    category VARCHAR(100),
+    area VARCHAR(100),
+    instructions TEXT,
+    thumbnail_url VARCHAR(500),
+    tags VARCHAR(255),
+    youtube_url VARCHAR(500),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_category (category),
+    INDEX idx_area (area),
+    INDEX idx_name (name)
+);
+
+-- レシピ材料テーブル
+CREATE TABLE recipe_ingredients (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    recipe_id INT NOT NULL,
+    ingredient_name VARCHAR(200) NOT NULL,
+    measure VARCHAR(100),
+    ingredient_order TINYINT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (recipe_id) REFERENCES recipes(id) ON DELETE CASCADE,
+    INDEX idx_recipe (recipe_id),
+    INDEX idx_ingredient (ingredient_name)
 );
 
 -- サンプルユーザーデータの挿入
