@@ -212,11 +212,11 @@ class Database {
     /**
      * セール情報を追加
      */
-    public function addSale($product_id, $sale_price, $start_date, $end_date, $description = '') {
+    public function addSale($product_id, $sale_price, $start_date, $end_date, $notes = '') {
         return $this->insert("
-            INSERT INTO sales (product_id, sale_price, start_date, end_date, description, is_active) 
+            INSERT INTO sales (product_id, sale_price, start_date, end_date, notes, is_active) 
             VALUES (?, ?, ?, ?, ?, 1)
-        ", [$product_id, $sale_price, $start_date, $end_date, $description]);
+        ", [$product_id, $sale_price, $start_date, $end_date, $notes]);
     }
     
     /**

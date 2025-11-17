@@ -50,7 +50,7 @@ try {
     $allProducts = $db->getAllProducts();
     echo "<p>登録商品数: " . count($allProducts) . "</p>";
     foreach (array_slice($allProducts, 0, 5) as $product) {
-        echo "<p>- {$product['name']}: ¥{$product['price']} (在庫: {$product['stock_quantity']}個)</p>";
+        echo "<p>- {$product['name']}: ¥{$product['regular_price']} (在庫: {$product['stock_quantity']}個)</p>";
     }
     
     // カテゴリ
