@@ -7,7 +7,7 @@ services:
     volumes:
       - ./shop_web:/var/www/html
     ports:
-      - "3000:80"  # ポートマッピングを80に変更
+      - "3000:80" # ポートマッピングを80に変更
     environment:
       - TZ=Asia/Tokyo
     depends_on:
@@ -45,7 +45,7 @@ services:
       MYSQL_ROOT_PASSWORD: ${DOCKER_DB_ROOT_PASS:-dev}
       MYSQL_USER: ${DOCKER_DB_USERNAME:-dev}
       MYSQL_PASSWORD: ${DOCKER_DB_PASSWORD:-dev}
-      MYSQL_DATABASE: ${DOCKER_DB_DATABASE:-laravel_stations}
+      MYSQL_DATABASE: ${DOCKER_DB_DATABASE:-supermarket_app}
       MYSQL_TCP_PORT: 3306
     ports:
       - "${DOCKER_DB_PORT:-3306}:3306"
@@ -55,7 +55,7 @@ services:
     networks:
       - app-network
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DOCKER_DB_ROOT_PASS:-dev}"]
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DOCKER_DB_ROOT_PASS:-dev}" ]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -63,6 +63,7 @@ services:
 
 volumes:
   laravel-railway-mysql-data:
+
 
 networks:
   app-network:
