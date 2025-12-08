@@ -1,0 +1,32 @@
+/* style.css */
+body {
+    margin: 0;
+    padding: 0;
+    font-family: sans-serif;
+}
+/* Leafletマップを配置するコンテナのサイズ指定は必須 */
+#mapid {
+    height: 500px; /* 地図の表示高さを設定 */
+    width: 80%;
+    margin: 20px auto;
+    border: 1px solid #ccc;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+.controls {
+    text-align: center;
+    margin: 10px 0;
+}
+.btn {
+    padding: 10px 20px;
+    background-color: #38a169; /* スーモカラー風 */
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+    font-size: 16px;
+}
+/*
+.leaflet-container {
+    /* Leafletが使用するスタイル */
+    /* デフォルトのLeaflet CSSも別途読み込む必要があります */
+/*}
