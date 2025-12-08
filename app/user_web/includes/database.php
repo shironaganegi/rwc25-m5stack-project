@@ -9,8 +9,8 @@ class Database {
     private $connection;
     
     // データベース設定
-    private const HOST = 'mysql';    // Dockerコンテナ名
-    private const PORT = 3306;       // コンテナ内部のポート
+    private const HOST = 'mysql';
+    private const PORT = 3306;
     private const DBNAME = 'supermarket_app';
     private const USERNAME = 'dev';
     private const PASSWORD = 'dev';
@@ -43,172 +43,158 @@ class Database {
         return $this->connection;
     }
     
-    // データベースアクセス用のヘルパーメソッド
-    
-    /**
-     * SELECT文を実行
-     */
+    // 基本メソッド
     public function select($sql, $params = []) {
         $stmt = $this->connection->prepare($sql);
         $stmt->execute($params);
         return $stmt->fetchAll();
     }
     
-    /**
-     * 単一レコードを取得
-     */
     public function selectOne($sql, $params = []) {
         $stmt = $this->connection->prepare($sql);
         $stmt->execute($params);
         return $stmt->fetch();
     }
     
-    /**
-     * INSERT文を実行
-     */
     public function insert($sql, $params = []) {
         $stmt = $this->connection->prepare($sql);
         $stmt->execute($params);
         return $this->connection->lastInsertId();
     }
     
-    /**
-     * UPDATE文を実行
-     */
     public function update($sql, $params = []) {
         $stmt = $this->connection->prepare($sql);
         $stmt->execute($params);
         return $stmt->rowCount();
     }
     
-    /**
-     * DELETE文を実行
-     */
     public function delete($sql, $params = []) {
         $stmt = $this->connection->prepare($sql);
         $stmt->execute($params);
         return $stmt->rowCount();
     }
     
-    // スーパーマーケットアプリ用の専用メソッド
-    
-    /**
-     * 全商品を取得（カテゴリ名付き）
-     */
+    // アプリ専用メソッド
+
     public function getAllProducts() {
-        return $this->select("
-            SELECT p.*, c.name as category_name 
-            FROM products p 
-            LEFT JOIN categories c ON p.category_id = c.id 
-            ORDER BY p.name
-        ");
+        return $this->select("SELECT p.*, c.name as category_name FROM products p LEFT JOIN categories c ON p.category_id = c.id ORDER BY p.name");
     }
     
-    /**
-     * カテゴリ別商品を取得
-     */
     public function getProductsByCategory($categoryId) {
-        return $this->select("
-            SELECT p.*, c.name as category_name 
-            FROM products p 
-            LEFT JOIN categories c ON p.category_id = c.id 
-            WHERE p.category_id = ?
-            ORDER BY p.name
-        ", [$categoryId]);
+        return $this->select("SELECT p.*, c.name as category_name FROM products p LEFT JOIN categories c ON p.category_id = c.id WHERE p.category_id = ? ORDER BY p.name", [$categoryId]);
     }
     
-    /**
-     * アクティブなセール情報を取得
-     */
     public function getActiveSales() {
-        return $this->select("
-            SELECT s.*, p.name as product_name 
-            FROM sales s 
-            JOIN products p ON s.product_id = p.id 
+        return $this->select("SELECT s.*, p.name as product_name FROM sales s JOIN products p ON s.product_id = p.id WHERE s.is_active = 1 AND s.start_date <= CURDATE() AND s.end_date >= CURDATE() ORDER BY s.start_date DESC");
+    }
+
+    public function getActiveSalesByStore($keyword = null) {
+        $sql = "
+            SELECT 
+                st.id as store_id,
+                st.name as store_name,
+                st.category as store_category,
+                s.id as sale_id,
+                s.sale_price,
+                s.end_date,
+                p.name as product_name,
+                p.regular_price,
+                c.name as category_name
+            FROM sales s
+            JOIN products p ON s.product_id = p.id
+            LEFT JOIN categories c ON p.category_id = c.id
+            JOIN sale_stores ss ON s.id = ss.sale_id
+            JOIN stores st ON ss.store_id = st.id
             WHERE s.is_active = 1 
             AND s.start_date <= CURDATE() 
             AND s.end_date >= CURDATE()
-            ORDER BY s.start_date DESC
-        ");
+        ";
+        $params = [];
+        if ($keyword) {
+            $sql .= " AND (p.name LIKE ? OR c.name LIKE ? OR st.name LIKE ?)";
+            $wildcard = "%{$keyword}%";
+            $params = [$wildcard, $wildcard, $wildcard];
+        }
+        $sql .= " ORDER BY st.id, s.start_date DESC";
+        return $this->select($sql, $params);
+    }
+
+    // ★★★ これが不足していたメソッドです ★★★
+    public function searchCheapestSales($keyword = null) {
+        $sql = "
+            SELECT
+                p.name as product_name,
+                p.regular_price,
+                s.sale_price,
+                s.end_date,
+                st.name as store_name,
+                c.name as category_name
+            FROM sales s
+            JOIN products p ON s.product_id = p.id
+            LEFT JOIN categories c ON p.category_id = c.id
+            JOIN sale_stores ss ON s.id = ss.sale_id
+            JOIN stores st ON ss.store_id = st.id
+            WHERE s.is_active = 1
+            AND s.start_date <= CURDATE()
+            AND s.end_date >= CURDATE()
+        ";
+
+        $params = [];
+        if ($keyword) {
+            $sql .= " AND (p.name LIKE ? OR c.name LIKE ?)";
+            $params[] = "%$keyword%";
+            $params[] = "%$keyword%";
+        }
+
+        // 安い順にソートして上位20件を取得
+        $sql .= " ORDER BY s.sale_price ASC LIMIT 20";
+
+        return $this->select($sql, $params);
     }
     
-    /**
-     * 在庫が少ない商品を取得
-     */
     public function getLowStockProducts($threshold = 10) {
-        return $this->select("
-            SELECT p.*, c.name as category_name 
-            FROM products p 
-            LEFT JOIN categories c ON p.category_id = c.id 
-            WHERE p.stock_quantity <= ?
-            ORDER BY p.stock_quantity ASC
-        ", [$threshold]);
+        return $this->select("SELECT p.*, c.name as category_name FROM products p LEFT JOIN categories c ON p.category_id = c.id WHERE p.stock_quantity <= ? ORDER BY p.stock_quantity ASC", [$threshold]);
     }
     
-    /**
-     * 売上目標の達成状況を取得
-     */
     public function getSalesTargetStatus($userId, $date = null) {
-        if ($date === null) {
-            $date = date('Y-m-d');
-        }
-        
-        $target = $this->selectOne("
-            SELECT * FROM sales_targets 
-            WHERE user_id = ? AND target_date = ?
-        ", [$userId, $date]);
-        
-        if (!$target) {
-            return null;
-        }
-        
-        $actualSales = $this->selectOne("
-            SELECT SUM(total_amount) as total 
-            FROM sales_data 
-            WHERE user_id = ? AND sale_date = ?
-        ", [$userId, $date]);
-        
+        if ($date === null) { $date = date('Y-m-d'); }
+        $target = $this->selectOne("SELECT * FROM sales_targets WHERE user_id = ? AND target_date = ?", [$userId, $date]);
+        if (!$target) { return null; }
+        $actualSales = $this->selectOne("SELECT SUM(total_amount) as total FROM sales_data WHERE user_id = ? AND sale_date = ?", [$userId, $date]);
         $target['actual_amount'] = $actualSales['total'] ?? 0;
-        $target['achievement_rate'] = $target['target_amount'] > 0 
-            ? ($target['actual_amount'] / $target['target_amount']) * 100 
-            : 0;
-            
+        $target['achievement_rate'] = $target['target_amount'] > 0 ? ($target['actual_amount'] / $target['target_amount']) * 100 : 0;
         return $target;
     }
     
-    /**
-     * 商品を検索
-     */
     public function searchProducts($keyword) {
-        return $this->select("
-            SELECT p.*, c.name as category_name 
-            FROM products p 
-            LEFT JOIN categories c ON p.category_id = c.id 
-            WHERE p.name LIKE ? OR c.name LIKE ?
-            ORDER BY p.name
-        ", ["%$keyword%", "%$keyword%"]);
+        return $this->select("SELECT p.*, c.name as category_name FROM products p LEFT JOIN categories c ON p.category_id = c.id WHERE p.name LIKE ? OR c.name LIKE ? ORDER BY p.name", ["%$keyword%", "%$keyword%"]);
     }
-}
 
-// 使用例とヘルパー関数
+    // 冷蔵庫機能用メソッド
+    public function getRefrigeratorItems($userId) {
+        return $this->select("SELECT * FROM user_refrigerator WHERE user_id = ? ORDER BY expiry_date ASC", [$userId]);
+    }
 
-/**
- * データベースインスタンスを取得
- */
-function getDB() {
-    return Database::getInstance();
-}
+    public function addRefrigeratorItem($userId, $productName, $quantity, $expiryDate) {
+        return $this->insert(
+            "INSERT INTO user_refrigerator (user_id, product_name, quantity, expiry_date) VALUES (?, ?, ?, ?)",
+            [$userId, $productName, $quantity, $expiryDate]
+        );
+    }
 
-/**
- * 接続テスト用関数
- */
+    public function deleteRefrigeratorItem($id, $userId) {
+        return $this->delete("DELETE FROM user_refrigerator WHERE id = ? AND user_id = ?", [$id, $userId]);
+    }
+
+} // Class End
+
+function getDB() { return Database::getInstance(); }
+
 function testConnection() {
     try {
         $db = Database::getInstance();
         $result = $db->selectOne("SELECT 'Connection OK' as status");
         return $result['status'] === 'Connection OK';
-    } catch (Exception $e) {
-        return false;
-    }
+    } catch (Exception $e) { return false; }
 }
 ?>

@@ -11,8 +11,6 @@ try {
     $db = Database::getInstance();
 
     if (!empty($search_keyword)) {
-        // 【検索時】キーワードでレシピ名と材料を検索
-        // DISTINCTを使って重複を除外
         $sql = "
             SELECT DISTINCT r.* FROM recipes r 
             LEFT JOIN recipe_ingredients ri ON r.id = ri.recipe_id 
@@ -66,7 +64,7 @@ try {
                     <?php elseif (!empty($search_keyword)): ?>
                         「<?php echo htmlspecialchars($search_keyword); ?>」の検索結果が見つかりませんでした。
                     <?php else: ?>
-                        レシピが見つかりませんでした。データベースを確認してください。
+                        レシピが見つかりませんでした。
                     <?php endif; ?>
                 </p>
             <?php endif; ?>
