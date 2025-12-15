@@ -88,6 +88,7 @@ class Database {
         return $this->select("SELECT s.*, p.name as product_name FROM sales s JOIN products p ON s.product_id = p.id WHERE s.is_active = 1 AND s.start_date <= CURDATE() AND s.end_date >= CURDATE() ORDER BY s.start_date DESC");
     }
 
+    // ★修正箇所: セール一覧ページ用（定価より安いものだけに限定）
     public function getActiveSalesByStore($keyword = null) {
         $sql = "
             SELECT 
@@ -108,6 +109,7 @@ class Database {
             WHERE s.is_active = 1 
             AND s.start_date <= CURDATE() 
             AND s.end_date >= CURDATE()
+            AND s.sale_price < p.regular_price  -- ここを追加：定価より安いものだけ取得
         ";
         $params = [];
         if ($keyword) {
@@ -119,7 +121,9 @@ class Database {
         return $this->select($sql, $params);
     }
 
-    // ★★★ これが不足していたメソッドです ★★★
+    /**
+     * 単品検索用（安い順）
+     */
     public function searchCheapestSales($keyword = null) {
         $sql = "
             SELECT
@@ -128,7 +132,8 @@ class Database {
                 s.sale_price,
                 s.end_date,
                 st.name as store_name,
-                c.name as category_name
+                c.name as category_name,
+                CASE WHEN s.sale_price < p.regular_price THEN 1 ELSE 0 END as is_sale
             FROM sales s
             JOIN products p ON s.product_id = p.id
             LEFT JOIN categories c ON p.category_id = c.id
@@ -146,10 +151,125 @@ class Database {
             $params[] = "%$keyword%";
         }
 
-        // 安い順にソートして上位20件を取得
-        $sql .= " ORDER BY s.sale_price ASC LIMIT 20";
-
+        $sql .= " ORDER BY s.sale_price ASC LIMIT 50";
         return $this->select($sql, $params);
+    }
+
+    /**
+     * 複数商品の最安値店舗比較検索
+     */
+    public function searchProductPriceComparison($keywords) {
+        $keywords = array_filter($keywords, function($v) { return trim($v) !== ''; });
+        if (empty($keywords)) {
+            return [];
+        }
+
+        $likeClauses = [];
+        $params = [];
+        foreach ($keywords as $k) {
+            $likeClauses[] = "p.name LIKE ?";
+            $params[] = "%{$k}%";
+        }
+        $whereClause = implode(' OR ', $likeClauses);
+
+        // SQL: セール品と通常品を取得して結合
+        $sql = "
+            SELECT 
+                st.id as store_id,
+                st.name as store_name,
+                p.name as product_name,
+                s.sale_price as price,
+                CASE WHEN s.sale_price < p.regular_price THEN 1 ELSE 0 END as is_sale,
+                s.end_date as sale_end_date
+            FROM sales s
+            JOIN products p ON s.product_id = p.id
+            JOIN sale_stores ss ON s.id = ss.sale_id
+            JOIN stores st ON ss.store_id = st.id
+            WHERE s.is_active = 1 
+            AND s.start_date <= CURDATE() 
+            AND s.end_date >= CURDATE()
+            AND ($whereClause)
+
+            UNION ALL
+
+            SELECT 
+                st.id as store_id,
+                st.name as store_name,
+                p.name as product_name,
+                p.regular_price as price,
+                0 as is_sale,
+                NULL as sale_end_date
+            FROM products p
+            JOIN users u ON p.user_id = u.id
+            JOIN stores st ON u.store_name = st.name
+            WHERE ($whereClause)
+        ";
+        
+        $allItems = $this->select($sql, array_merge($params, $params));
+
+        $stores = [];
+
+        foreach ($allItems as $item) {
+            $storeId = $item['store_id'];
+            if (!isset($stores[$storeId])) {
+                $stores[$storeId] = [
+                    'id' => $storeId,
+                    'name' => $item['store_name'],
+                    'found_items' => []
+                ];
+            }
+
+            foreach ($keywords as $kw) {
+                if (stripos($item['product_name'], $kw) !== false) {
+                    if (!isset($stores[$storeId]['found_items'][$kw]) || 
+                        $item['price'] < $stores[$storeId]['found_items'][$kw]['price']) {
+                        
+                        $stores[$storeId]['found_items'][$kw] = [
+                            'name' => $item['product_name'],
+                            'price' => $item['price'],
+                            'is_sale' => $item['is_sale'],
+                            'end_date' => $item['sale_end_date']
+                        ];
+                    }
+                }
+            }
+        }
+
+        $result = [];
+        foreach ($stores as $storeId => $store) {
+            $total = 0;
+            $matchCount = 0;
+            $itemsList = [];
+
+            foreach ($keywords as $kw) {
+                if (isset($store['found_items'][$kw])) {
+                    $total += $store['found_items'][$kw]['price'];
+                    $matchCount++;
+                    $itemsList[] = $store['found_items'][$kw];
+                } else {
+                    $itemsList[] = ['name' => "{$kw} (なし)", 'price' => 0, 'is_missing' => true];
+                }
+            }
+
+            if ($matchCount > 0) {
+                $result[] = [
+                    'store_id' => $storeId,
+                    'store_name' => $store['name'],
+                    'total_price' => $total,
+                    'match_count' => $matchCount,
+                    'items' => $itemsList
+                ];
+            }
+        }
+
+        usort($result, function($a, $b) {
+            if ($a['match_count'] !== $b['match_count']) {
+                return $b['match_count'] - $a['match_count'];
+            }
+            return $a['total_price'] - $b['total_price'];
+        });
+
+        return $result;
     }
     
     public function getLowStockProducts($threshold = 10) {
@@ -170,7 +290,6 @@ class Database {
         return $this->select("SELECT p.*, c.name as category_name FROM products p LEFT JOIN categories c ON p.category_id = c.id WHERE p.name LIKE ? OR c.name LIKE ? ORDER BY p.name", ["%$keyword%", "%$keyword%"]);
     }
 
-    // 冷蔵庫機能用メソッド
     public function getRefrigeratorItems($userId) {
         return $this->select("SELECT * FROM user_refrigerator WHERE user_id = ? ORDER BY expiry_date ASC", [$userId]);
     }
