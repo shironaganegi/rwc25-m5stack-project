@@ -150,6 +150,118 @@ try {
                 echo "<p>売上目標データが見つかりませんでした。</p>";
             }
         }
+        
+        if (in_array('stores', $tables)) {
+            echo "<h2>🏪 店舗マスタデータ</h2>";
+            $stores = $pdo->query("SELECT * FROM stores ORDER BY id")->fetchAll(PDO::FETCH_ASSOC);
+            if ($stores) {
+                echo "<table border='1' style='border-collapse: collapse; margin: 20px 0;'>";
+                echo "<tr><th style='padding: 8px; background: #f0f0f0;'>ID</th><th style='padding: 8px; background: #f0f0f0;'>店舗名</th><th style='padding: 8px; background: #f0f0f0;'>住所</th><th style='padding: 8px; background: #f0f0f0;'>カテゴリ</th><th style='padding: 8px; background: #f0f0f0;'>緯度</th><th style='padding: 8px; background: #f0f0f0;'>経度</th></tr>";
+                foreach ($stores as $store) {
+                    echo "<tr>";
+                    echo "<td style='padding: 8px;'>{$store['id']}</td>";
+                    echo "<td style='padding: 8px;'>{$store['name']}</td>";
+                    echo "<td style='padding: 8px;'>" . ($store['address'] ?? 'N/A') . "</td>";
+                    echo "<td style='padding: 8px;'>{$store['category']}</td>";
+                    echo "<td style='padding: 8px;'>" . ($store['latitude'] ?? 'N/A') . "</td>";
+                    echo "<td style='padding: 8px;'>" . ($store['longitude'] ?? 'N/A') . "</td>";
+                    echo "</tr>";
+                }
+                echo "</table>";
+            } else {
+                echo "<p>店舗データが見つかりませんでした。</p>";
+            }
+        }
+        
+        if (in_array('recipes', $tables)) {
+            echo "<h2>🍳 レシピデータ（上位10件）</h2>";
+            $recipes = $pdo->query("SELECT * FROM recipes ORDER BY id LIMIT 10")->fetchAll(PDO::FETCH_ASSOC);
+            if ($recipes) {
+                echo "<table border='1' style='border-collapse: collapse; margin: 20px 0;'>";
+                echo "<tr><th style='padding: 8px; background: #f0f0f0;'>ID</th><th style='padding: 8px; background: #f0f0f0;'>レシピ名</th><th style='padding: 8px; background: #f0f0f0;'>カテゴリ</th><th style='padding: 8px; background: #f0f0f0;'>地域</th><th style='padding: 8px; background: #f0f0f0;'>材料数</th></tr>";
+                foreach ($recipes as $recipe) {
+                    // 材料数を取得
+                    $ingredientCount = $pdo->query("SELECT COUNT(*) FROM recipe_ingredients WHERE recipe_id = {$recipe['id']}")->fetchColumn();
+                    echo "<tr>";
+                    echo "<td style='padding: 8px;'>{$recipe['id']}</td>";
+                    echo "<td style='padding: 8px;'>{$recipe['name']}</td>";
+                    echo "<td style='padding: 8px;'>" . ($recipe['category'] ?? 'N/A') . "</td>";
+                    echo "<td style='padding: 8px;'>" . ($recipe['area'] ?? 'N/A') . "</td>";
+                    echo "<td style='padding: 8px; text-align: center;'>{$ingredientCount}</td>";
+                    echo "</tr>";
+                }
+                echo "</table>";
+                
+                // レシピ統計
+                $recipeStats = $pdo->query("
+                    SELECT 
+                        COUNT(*) as total_recipes,
+                        COUNT(DISTINCT category) as total_categories,
+                        COUNT(DISTINCT area) as total_areas
+                    FROM recipes
+                ")->fetch(PDO::FETCH_ASSOC);
+                
+                echo "<div style='background: #f0f8ff; padding: 10px; border-radius: 5px; margin: 10px 0;'>";
+                echo "<p><strong>レシピ統計:</strong></p>";
+                echo "<ul>";
+                echo "<li>総レシピ数: {$recipeStats['total_recipes']}件</li>";
+                echo "<li>カテゴリ数: {$recipeStats['total_categories']}種類</li>";
+                echo "<li>地域数: {$recipeStats['total_areas']}種類</li>";
+                echo "</ul>";
+                echo "</div>";
+            } else {
+                echo "<p>レシピデータが見つかりませんでした。</p>";
+            }
+        }
+        
+        // 新規テーブルの統計サマリー
+        echo "<h2>📈 新規追加テーブルのサマリー</h2>";
+        echo "<div style='background: #f0fff0; padding: 15px; border-radius: 5px; margin: 10px 0;'>";
+        echo "<h3>フェーズ2: 機能拡張テーブル</h3>";
+        echo "<ul>";
+        if (in_array('stores', $tables)) {
+            $storeCount = $pdo->query("SELECT COUNT(*) FROM stores")->fetchColumn();
+            echo "<li>✅ 店舗マスタ (stores): {$storeCount}件</li>";
+        }
+        if (in_array('user_favorite_stores', $tables)) {
+            $favStoreCount = $pdo->query("SELECT COUNT(*) FROM user_favorite_stores")->fetchColumn();
+            echo "<li>✅ お気に入り店舗 (user_favorite_stores): {$favStoreCount}件</li>";
+        }
+        if (in_array('user_favorite_products', $tables)) {
+            $favProductCount = $pdo->query("SELECT COUNT(*) FROM user_favorite_products")->fetchColumn();
+            echo "<li>✅ お気に入り商品 (user_favorite_products): {$favProductCount}件</li>";
+        }
+        if (in_array('user_refrigerator', $tables)) {
+            $refrigeratorCount = $pdo->query("SELECT COUNT(*) FROM user_refrigerator")->fetchColumn();
+            echo "<li>✅ 冷蔵庫管理 (user_refrigerator): {$refrigeratorCount}件</li>";
+        }
+        echo "</ul>";
+        
+        echo "<h3>フェーズ3: 設計改善</h3>";
+        echo "<ul>";
+        if (in_array('sale_stores', $tables)) {
+            $saleStoreCount = $pdo->query("SELECT COUNT(*) FROM sale_stores")->fetchColumn();
+            echo "<li>✅ セール×店舗中間テーブル (sale_stores): {$saleStoreCount}件</li>";
+        }
+        // deleted_atカラムの確認
+        $columns = $pdo->query("SHOW COLUMNS FROM users LIKE 'deleted_at'")->fetchAll();
+        if (!empty($columns)) {
+            echo "<li>✅ 論理削除機能 (users.deleted_at): 実装済み</li>";
+        }
+        echo "</ul>";
+        
+        echo "<h3>レシピ機能テーブル</h3>";
+        echo "<ul>";
+        if (in_array('recipes', $tables)) {
+            $recipeCount = $pdo->query("SELECT COUNT(*) FROM recipes")->fetchColumn();
+            echo "<li>✅ レシピマスタ (recipes): {$recipeCount}件</li>";
+        }
+        if (in_array('recipe_ingredients', $tables)) {
+            $ingredientCount = $pdo->query("SELECT COUNT(*) FROM recipe_ingredients")->fetchColumn();
+            echo "<li>✅ レシピ材料 (recipe_ingredients): {$ingredientCount}件</li>";
+        }
+        echo "</ul>";
+        echo "</div>";
     }
 
 } catch (PDOException $e) {
