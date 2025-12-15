@@ -1,4 +1,5 @@
 /* style.css */
+
 body {
     margin: 0;
     padding: 0;
@@ -6,7 +7,7 @@ body {
 }
 /* Leafletマップを配置するコンテナのサイズ指定は必須 */
 #mapid {
-    height: 500px; /* 地図の表示高さを設定 */
+    height: 60vh; /* 地図の表示高さを設定 */
     width: 80%;
     margin: 20px auto;
     border: 1px solid #ccc;
@@ -14,19 +15,27 @@ body {
 }
 .controls {
     text-align: center;
-    margin: 10px 0;
+    margin: 10px 0 20px 0;
 }
 .btn {
     padding: 10px 20px;
-    background-color: #38a169; /* スーモカラー風 */
+    background-color: #38a169;
     color: white;
     border: none;
     cursor: pointer;
     border-radius: 5px;
     font-size: 16px;
+    transition: background-color 0.3s;
 }
-/*
-.leaflet-container {
-    /* Leafletが使用するスタイル */
-    /* デフォルトのLeaflet CSSも別途読み込む必要があります */
-/*}
+.btn:disabled {
+    background-color: #a8a8a8;
+    cursor: not-allowed;
+}
+.btn:hover:not(:disabled) {
+    background-color: #2d8955;
+}
+
+/* マーカーのハイライト（検索対象となったマーカー） */
+.highlight-marker {
+    filter: hue-rotate(120deg) brightness(1.2) !important; /* 緑色に強調 */
+}
