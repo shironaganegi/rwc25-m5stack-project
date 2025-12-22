@@ -1,41 +1,19 @@
 /* style.css */
-
-body {
-    margin: 0;
-    padding: 0;
-    font-family: sans-serif;
-}
-/* Leafletマップを配置するコンテナのサイズ指定は必須 */
+body { margin: 0; padding: 20px; font-family: sans-serif; }
 #mapid {
-    height: 60vh; /* 地図の表示高さを設定 */
-    width: 80%;
-    margin: 20px auto;
+    height: 500px;
+    width: 100%;
+    max-width: 800px;
+    margin-bottom: 20px;
     border: 1px solid #ccc;
-    box-shadow: 0 0 10px rgba(0,0,0,0.1);
 }
-.controls {
-    text-align: center;
-    margin: 10px 0 20px 0;
-}
+.controls { margin-bottom: 20px; }
 .btn {
     padding: 10px 20px;
     background-color: #38a169;
     color: white;
     border: none;
-    cursor: pointer;
     border-radius: 5px;
-    font-size: 16px;
-    transition: background-color 0.3s;
+    cursor: pointer;
 }
-.btn:disabled {
-    background-color: #a8a8a8;
-    cursor: not-allowed;
-}
-.btn:hover:not(:disabled) {
-    background-color: #2d8955;
-}
-
-/* マーカーのハイライト（検索対象となったマーカー） */
-.highlight-marker {
-    filter: hue-rotate(120deg) brightness(1.2) !important; /* 緑色に強調 */
-}
+.btn:disabled { background-color: #ccc; }
