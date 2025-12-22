@@ -1,90 +1,58 @@
 <?php
-// result.php
-
-// ----------------------------------------------------------------------
-// ★手順1: map.phpで定義したものと同じ全物件データを再定義（DBを使用しないため）
-// ----------------------------------------------------------------------
-// 実際のアプリケーションでは、DBから全物件を取得する関数を呼び出します。
-$all_properties_by_id = [
-    101 => ['lat' => 35.6800, 'lng' => 139.7600, 'name' => '中央区高級マンション', 'price' => '8,000万円', 'id' => 101],
-    102 => ['lat' => 35.6586, 'lng' => 139.7454, 'name' => '東京タワー付近 (港区)', 'price' => '1.2億円', 'id' => 102],
-    103 => ['lat' => 35.7000, 'lng' => 139.7750, 'name' => '台東区の戸建', 'price' => '4,500万円', 'id' => 103],
-    104 => ['lat' => 35.6950, 'lng' => 139.7000, 'name' => '新宿駅周辺物件', 'price' => '6,500万円', 'id' => 104],
-    105 => ['lat' => 35.6700, 'lng' => 139.6900, 'name' => '渋谷駅周辺物件', 'price' => '7,200万円', 'id' => 105],
+// 本来はDBから取得しますが、サンプルとして全データを配列で持っておきます
+$all_properties = [
+    101 => ['lat' => 35.6800, 'lng' => 139.7600, 'name' => '中央区マンション', 'price' => '8,000万円'],
+    102 => ['lat' => 35.6586, 'lng' => 139.7454, 'name' => '港区タワー', 'price' => '1.2億円'],
+    103 => ['lat' => 35.7100, 'lng' => 139.8107, 'name' => '墨田区戸建', 'price' => '5,500万円'],
+    104 => ['lat' => 35.6950, 'lng' => 139.7000, 'name' => '新宿ビル', 'price' => '9,000万円'],
 ];
 
-
-// ----------------------------------------------------------------------
-// ★手順2: 送信されたIDリストの取得と処理
-// ----------------------------------------------------------------------
-$selected_properties = [];
-$selected_ids_raw = '';
-
-if ($_SERVER["REQUEST_METHOD"] === "POST" && !empty($_POST['selected_ids'])) {
-    $selected_ids_raw = $_POST['selected_ids'];
-    
-    // カンマ区切りのID文字列を配列に変換
-    $selected_ids_array = explode(',', $selected_ids_raw);
-    
-    // 囲まれたIDだけを $all_properties_by_id から抽出
-    foreach ($selected_ids_array as $id_string) {
-        $id = (int)$id_string;
-        if (isset($all_properties_by_id[$id])) {
-            $selected_properties[] = $all_properties_by_id[$id];
+$selected_items = [];
+if (!empty($_POST['selected_ids'])) {
+    $ids = explode(',', $_POST['selected_ids']);
+    foreach ($ids as $id) {
+        if (isset($all_properties[$id])) {
+            $selected_items[] = $all_properties[$id];
         }
     }
 }
-
-$found_count = count($selected_properties);
 ?>
 <!DOCTYPE html>
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
     <title>検索結果</title>
-    <style>
-        body { font-family: sans-serif; padding: 20px; }
-        .result-box {
-            border: 2px solid #38a169;
-            padding: 20px;
-            margin: 20px 0;
-            border-radius: 8px;
-            background-color: #f0fff0;
-        }
-        .property-list { list-style: none; padding: 0; }
-        .property-list li {
-            border-bottom: 1px dashed #ccc;
-            padding: 10px 0;
-            display: flex;
-            justify-content: space-between;
-        }
-        .property-list li:last-child { border-bottom: none; }
-    </style>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
 </head>
 <body>
-    <h1>✅ エリア検索結果</h1>
-
-    <div class="result-box">
-        <h2>🎉 **<?php echo $found_count; ?>件** の物件が見つかりました！</h2>
-        <p>（この件数は、地図上で囲まれた物件の数と一致します。）</p>
+    <h1>検索結果: <?php echo count($selected_items); ?>件</h1>
+    <div class="controls">
+        <a href="map.php" class="btn" style="text-decoration:none;">← 戻って再検索</a>
     </div>
-    
-    <h3>囲まれた物件一覧</h3>
 
-    <?php if ($found_count > 0): ?>
-        <ul class="property-list">
-            <?php foreach ($selected_properties as $property): ?>
-                <li>
-                    <span>**<?php echo htmlspecialchars($property['name']); ?>** (ID: <?php echo $property['id']; ?>)</span>
-                    <span>価格: <?php echo htmlspecialchars($property['price']); ?></span>
-                </li>
-            <?php endforeach; ?>
-        </ul>
-    <?php else: ?>
-        <p>選択されたエリア内には、指定された物件は見つかりませんでした。</p>
-    <?php endif; ?>
-    
-    <hr>
-    <p><a href="map.php">← 地図に戻る</a></p>
+    <div id="mapid"></div>
+
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script>
+        const SELECTED_DATA = <?php echo json_encode($selected_items, JSON_UNESCAPED_UNICODE); ?>;
+        
+        const map = L.map('mapid').setView([35.6895, 139.7500], 12);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+        if (SELECTED_DATA.length > 0) {
+            const markers = [];
+            SELECTED_DATA.forEach(p => {
+                const m = L.marker([p.lat, p.lng])
+                    .addTo(map)
+                    .bindPopup(`<b>${p.name}</b><br>価格: ${p.price}`);
+                markers.push(m);
+            });
+
+            // 全てのピンが収まるように表示を調整
+            const group = new L.featureGroup(markers);
+            map.fitBounds(group.getBounds().pad(0.2));
+        }
+    </script>
 </body>
 </html>
