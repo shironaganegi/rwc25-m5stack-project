@@ -27,6 +27,8 @@ class Database {
                     PDO::ATTR_EMULATE_PREPARES => false,
                 ]
             );
+            // 文字エンコーディングを明示的に設定
+            $this->connection->exec("SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci");
         } catch (PDOException $e) {
             throw new Exception("データベース接続エラー: " . $e->getMessage());
         }

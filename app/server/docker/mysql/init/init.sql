@@ -1,5 +1,8 @@
 -- supermarket_appデータベースの初期化スクリプト
 
+-- 文字セットを明示的に設定
+SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci;
+
 -- データベース作成
 CREATE DATABASE IF NOT EXISTS supermarket_app CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
