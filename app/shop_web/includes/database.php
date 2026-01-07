@@ -212,11 +212,16 @@ class Database {
     /**
      * セール情報を追加
      */
-    public function addSale($product_id, $sale_price, $start_date, $end_date, $description = '') {
+    public function addSale($product_id, $sale_price, $start_date, $end_date, $user_id, $notes = '') {
+        // 通常価格を取得して割引額を計算
+        $product = $this->selectOne("SELECT regular_price FROM products WHERE id = ?", [$product_id]);
+        $regular_price = $product['regular_price'] ?? $sale_price;
+        $discount_amount = $regular_price - $sale_price;
+        
         return $this->insert("
-            INSERT INTO sales (product_id, sale_price, start_date, end_date, description, is_active) 
-            VALUES (?, ?, ?, ?, ?, 1)
-        ", [$product_id, $sale_price, $start_date, $end_date, $description]);
+            INSERT INTO sales (product_id, sale_price, discount_amount, start_date, end_date, notes, is_active, user_id) 
+            VALUES (?, ?, ?, ?, ?, ?, 1, ?)
+        ", [$product_id, $sale_price, $discount_amount, $start_date, $end_date, $notes, $user_id]);
     }
     
     /**
