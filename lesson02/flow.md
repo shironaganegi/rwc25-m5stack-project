@@ -22,7 +22,7 @@ graph TD
 
     subgraph クライアント実装
         C1[開発方針確認] --> C2(Flet利用);
-        C2 --> C3(GASサーバーAPIへリクエスト送信);
+        C2 --> C3(GASサーバーAPIへリクエスト送信);fow
         C3 --> C4(レスポンス（JSON）を処理);
         C4 --> C5(UI表示・操作);
     end
