@@ -2,6 +2,11 @@
 
 -- データベース作成
 CREATE DATABASE IF NOT EXISTS supermarket_app CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- ユーザー'dev'にsupermarket_appデータベースへの権限を付与
+GRANT ALL PRIVILEGES ON supermarket_app.* TO 'dev'@'%';
+FLUSH PRIVILEGES;
+
 USE supermarket_app;
 
 -- ユーザー（店舗スタッフ）テーブル

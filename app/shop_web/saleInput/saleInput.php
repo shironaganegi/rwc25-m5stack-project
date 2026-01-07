@@ -1,5 +1,5 @@
 <?php
-require_once $_SERVER['DOCUMENT_ROOT'] . '/includes/database.php';
+require_once __DIR__ . '/../includes/database.php';
 
 $page_title = "セール情報入力";
 $active_nav = "入力";
