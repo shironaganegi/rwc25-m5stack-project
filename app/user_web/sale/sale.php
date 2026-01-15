@@ -17,12 +17,17 @@ function getStoreLogo($storeName) {
     return '/assets/image/logo_icon.png';
 }
 
+// ユーザーID (仮)
+$userId = 1;
+
 // 検索キーワードの取得
 $keyword = $_GET['search'] ?? null;
 
-// データベースからセール情報を取得（キーワードがあれば絞り込み）
+// データベースからセール情報を取得（キーワードとお気に入りで絞り込み）
 $db = getDB();
-$raw_sales = $db->getActiveSalesByStore($keyword);
+
+// 第2引数にユーザーIDを渡して、お気に入り店舗のみに限定する
+$raw_sales = $db->getActiveSalesByStore($keyword, $userId);
 
 $sale_data = [];
 foreach ($raw_sales as $row) {
@@ -71,7 +76,6 @@ $sale_data = array_values($sale_data);
                 </button>
                 <input type="text" name="search" class="search-input" placeholder="食材、店舗名で検索" value="<?php echo htmlspecialchars($keyword ?? ''); ?>">
             </form>
-            <a href="#" class="add-store-button">登録スーパー追加</a>
         </section>
 
         <hr class="yellow-separator">
@@ -80,10 +84,16 @@ $sale_data = array_values($sale_data);
             <?php if (empty($sale_data)): ?>
                 <div class="no-sales-message" style="text-align: center; padding: 20px;">
                     <?php if ($keyword): ?>
-                        <p>「<?php echo htmlspecialchars($keyword); ?>」に一致するセール商品は見つかりませんでした。</p>
-                        <a href="/sale/sale.php" style="color: #007bff; text-decoration: underline;">全件表示に戻る</a>
+                        <p>条件に一致するセール商品は見つかりませんでした。</p>
+                        <a href="/sale/sale.php" style="color: #007bff; text-decoration: underline;">条件をクリア</a>
                     <?php else: ?>
-                        <p>現在開催中のセール情報はありません。</p>
+                        <p>お気に入り店舗のセール情報はありません。</p>
+                        <p style="font-size:0.9em; color:#666; margin-top:10px; line-height:1.6;">
+                            店舗をお気に入り登録すると、ここにセール情報が表示されます。<br>
+                            <a href="/favorites/favorites.php?tab=store" style="color:#007bff; text-decoration:underline; font-weight:bold;">
+                                ＞ お気に入り店舗を登録する
+                            </a>
+                        </p>
                     <?php endif; ?>
                 </div>
             <?php else: ?>

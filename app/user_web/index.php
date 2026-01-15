@@ -24,7 +24,7 @@ try {
                 INSERT INTO user_refrigerator (user_id, product_name, quantity, expiry_date, created_at)
                 VALUES (?, ?, ?, ?, ?)
             ");
-            // 時刻情報を付けるために時間を結合（購入日はその日の現在時刻、または00:00:00など）
+            // 時刻情報を付けるために時間を結合
             $created_at_value = $purchase_date . ' ' . date('H:i:s');
             
             $stmt->execute([$user_id, $name, $quantity, $expiry_date, $created_at_value]);
@@ -44,11 +44,6 @@ try {
     ";
     $items = $db->select($sql, [$user_id]);
 
-    // ランダムに棚を割り振る処理（元の機能を維持）
-    foreach ($items as &$item) {
-        $item['display_shelf'] = (rand(0, 1) === 0) ? 'upper' : 'lower';
-    }
-    unset($item);
 
 } catch (Exception $e) {
     $message = "エラー: " . $e->getMessage();
@@ -70,11 +65,9 @@ try {
     <main>
         <section class="refrigerator-image-section">
             <div class="refrigerator-image-container">
-                <div id="upper-fridge-button" class="fridge-section fridge-upper">
-                    <img src="/assets/image/冷蔵庫上段.png" alt="冷蔵庫上段">
-                </div>
-                <div id="lower-fridge-button" class="fridge-section fridge-lower">
-                     <img src="/assets/image/冷蔵庫下段.png" alt="冷蔵庫下段">
+                <div class="fridge-static-image">
+                    <img src="/assets/image/冷蔵庫上段.png" alt="冷蔵庫">
+                    <img src="/assets/image/冷蔵庫下段.png" alt="冷蔵庫" style="margin-top: -4px;">
                 </div>
             </div>
         </section>
@@ -82,12 +75,12 @@ try {
         <hr class="yellow-separator">
 
         <section class="search-section">
-            <form id="refrigerator-search-form" class="search-container">
+            <div class="search-container">
                 <svg class="search-icon" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
                 </svg>
                 <input type="text" id="search-input" class="search-input" placeholder="冷蔵庫の中身を検索...">
-            </form>
+            </div>
 
             <div class="add-item-container">
                 <h3>食品を追加</h3>
@@ -114,16 +107,19 @@ try {
             </div>
         </section>
 
-        <section id="upper-shelf-items" class="item-list-section" data-shelf="upper" style="display: none;">
+        <section class="item-list-section">
             <div class="list-header">
-                <span class="header-shelf">上段</span>
-                <span class="header-details">詳細情報</span>
+                <span class="header-shelf">冷蔵庫の中身一覧</span>
             </div>
-            <div class="items-container">
-                <?php foreach ($items as $item): ?>
-                    <?php if ($item['display_shelf'] === 'upper'): ?>
-                        <div class="fridge-item" data-name="<?php echo htmlspecialchars($item['product_name']); ?>" data-brand="" data-shelf="upper">
-                            <img src="/assets/image/logo_icon.png" alt="No Image" class="item-image">
+            <div class="items-container" id="items-list">
+                <?php if (empty($items)): ?>
+                    <div style="padding: 20px; text-align: center; color: #888;">
+                        登録されている食品はありません。
+                    </div>
+                <?php else: ?>
+                    <?php foreach ($items as $item): ?>
+                        <div class="fridge-item" data-name="<?php echo htmlspecialchars($item['product_name']); ?>">
+                            <img src="/assets/image/logo_icon.png" alt="Icon" class="item-image">
                             <div class="item-details">
                                 <p class="item-brand">--</p>
                                 <p class="item-name"><?php echo htmlspecialchars($item['product_name']); ?></p>
@@ -137,43 +133,32 @@ try {
                                 <p class="item-info">個数: <?php echo htmlspecialchars($item['quantity']); ?></p>
                             </div>
                         </div>
-                    <?php endif; ?>
-                <?php endforeach; ?>
-            </div>
-        </section>
-
-        <section id="lower-shelf-items" class="item-list-section" data-shelf="lower" style="display: none;">
-            <div class="list-header">
-                <span class="header-shelf">下段</span>
-                <span class="header-details">詳細情報</span>
-            </div>
-            <div class="items-container">
-                <?php foreach ($items as $item): ?>
-                    <?php if ($item['display_shelf'] === 'lower'): ?>
-                        <div class="fridge-item" data-name="<?php echo htmlspecialchars($item['product_name']); ?>" data-brand="" data-shelf="lower">
-                            <img src="/assets/image/logo_icon.png" alt="No Image" class="item-image">
-                            <div class="item-details">
-                                <p class="item-brand">--</p>
-                                <p class="item-name"><?php echo htmlspecialchars($item['product_name']); ?></p>
-                                
-                                <div class="item-dates">
-                                    <p class="item-info">購入: <?php echo date('n/j', strtotime($item['created_at'])); ?></p>
-                                    <p class="item-info" style="<?php echo ($item['expiry_date'] && strtotime($item['expiry_date']) < time()) ? 'color:red;' : ''; ?>">
-                                        期限: <?php echo $item['expiry_date'] ? date('n/j', strtotime($item['expiry_date'])) : '--'; ?>
-                                    </p>
-                                </div>
-                                <p class="item-info">個数: <?php echo htmlspecialchars($item['quantity']); ?></p>
-                            </div>
-                        </div>
-                    <?php endif; ?>
-                <?php endforeach; ?>
+                    <?php endforeach; ?>
+                <?php endif; ?>
             </div>
         </section>
     </main>
 
     <?php include $_SERVER['DOCUMENT_ROOT'] . '/assets/php/footer.php'; ?>
 
-    <script src="/refrigerator/refrigerator.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('search-input');
+            const items = document.querySelectorAll('.fridge-item');
+
+            searchInput.addEventListener('input', function(e) {
+                const keyword = e.target.value.toLowerCase();
+                items.forEach(item => {
+                    const name = item.getAttribute('data-name').toLowerCase();
+                    if (name.includes(keyword)) {
+                        item.style.display = 'flex';
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
+            });
+        });
+    </script>
 
 </body>
 </html>

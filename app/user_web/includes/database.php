@@ -88,8 +88,8 @@ class Database {
         return $this->select("SELECT s.*, p.name as product_name FROM sales s JOIN products p ON s.product_id = p.id WHERE s.is_active = 1 AND s.start_date <= CURDATE() AND s.end_date >= CURDATE() ORDER BY s.start_date DESC");
     }
 
-    // ★修正箇所: セール一覧ページ用（定価より安いものだけに限定）
-    public function getActiveSalesByStore($keyword = null) {
+    // ★修正箇所: ユーザーIDを受け取り、お気に入り店舗のみに絞り込む機能を追加
+    public function getActiveSalesByStore($keyword = null, $userId = null) {
         $sql = "
             SELECT 
                 st.id as store_id,
@@ -106,24 +106,38 @@ class Database {
             LEFT JOIN categories c ON p.category_id = c.id
             JOIN sale_stores ss ON s.id = ss.sale_id
             JOIN stores st ON ss.store_id = st.id
+        ";
+
+        // $userIdが指定されている場合、お気に入りテーブルとJOINして絞り込む
+        if ($userId !== null) {
+            $sql .= " JOIN user_favorite_stores ufs ON st.id = ufs.store_id AND ufs.user_id = ? ";
+        }
+
+        $sql .= "
             WHERE s.is_active = 1 
             AND s.start_date <= CURDATE() 
             AND s.end_date >= CURDATE()
-            AND s.sale_price < p.regular_price  -- ここを追加：定価より安いものだけ取得
+            AND s.sale_price < p.regular_price
         ";
+
         $params = [];
+        // パラメータの追加順序に注意（JOINの条件が先）
+        if ($userId !== null) {
+            $params[] = $userId;
+        }
+
         if ($keyword) {
             $sql .= " AND (p.name LIKE ? OR c.name LIKE ? OR st.name LIKE ?)";
             $wildcard = "%{$keyword}%";
-            $params = [$wildcard, $wildcard, $wildcard];
+            $params[] = $wildcard;
+            $params[] = $wildcard;
+            $params[] = $wildcard;
         }
+        
         $sql .= " ORDER BY st.id, s.start_date DESC";
         return $this->select($sql, $params);
     }
 
-    /**
-     * 単品検索用（安い順）
-     */
     public function searchCheapestSales($keyword = null) {
         $sql = "
             SELECT
@@ -155,9 +169,6 @@ class Database {
         return $this->select($sql, $params);
     }
 
-    /**
-     * 複数商品の最安値店舗比較検索
-     */
     public function searchProductPriceComparison($keywords) {
         $keywords = array_filter($keywords, function($v) { return trim($v) !== ''; });
         if (empty($keywords)) {
@@ -172,7 +183,6 @@ class Database {
         }
         $whereClause = implode(' OR ', $likeClauses);
 
-        // SQL: セール品と通常品を取得して結合
         $sql = "
             SELECT 
                 st.id as store_id,
@@ -303,6 +313,88 @@ class Database {
 
     public function deleteRefrigeratorItem($id, $userId) {
         return $this->delete("DELETE FROM user_refrigerator WHERE id = ? AND user_id = ?", [$id, $userId]);
+    }
+
+    // --- お気に入り機能用メソッド ---
+
+    public function getUserFavoriteStores($userId) {
+        $sql = "
+            SELECT s.*, 
+                   1 as is_favorite
+            FROM stores s
+            JOIN user_favorite_stores ufs ON s.id = ufs.store_id
+            WHERE ufs.user_id = ?
+        ";
+        return $this->select($sql, [$userId]);
+    }
+
+    public function getUserFavoriteProducts($userId) {
+        $sql = "
+            SELECT p.name, MAX(p.id) as id 
+            FROM products p
+            JOIN user_favorite_products ufp ON p.id = ufp.product_id
+            WHERE ufp.user_id = ?
+            GROUP BY p.name
+        ";
+        return $this->select($sql, [$userId]);
+    }
+
+    public function searchStoresForFavorites($userId, $keyword) {
+        $sql = "
+            SELECT s.*, 
+                   (SELECT COUNT(*) FROM user_favorite_stores WHERE store_id = s.id AND user_id = ?) as is_favorite
+            FROM stores s
+            WHERE s.name LIKE ?
+        ";
+        return $this->select($sql, [$userId, "%$keyword%"]);
+    }
+
+    public function searchProductsForFavorites($userId, $keyword) {
+        $sql = "
+            SELECT p.name, MIN(p.id) as id,
+                   (SELECT COUNT(*) FROM user_favorite_products ufp JOIN products p2 ON ufp.product_id = p2.id WHERE p2.name = p.name AND ufp.user_id = ?) as is_favorite
+            FROM products p
+            WHERE p.name LIKE ?
+            GROUP BY p.name
+        ";
+        return $this->select($sql, [$userId, "%$keyword%"]);
+    }
+
+    public function toggleFavoriteStore($userId, $storeId) {
+        $exists = $this->selectOne("SELECT id FROM user_favorite_stores WHERE user_id = ? AND store_id = ?", [$userId, $storeId]);
+        if ($exists) {
+            $this->delete("DELETE FROM user_favorite_stores WHERE id = ?", [$exists['id']]);
+            return false;
+        } else {
+            $this->insert("INSERT INTO user_favorite_stores (user_id, store_id) VALUES (?, ?)", [$userId, $storeId]);
+            return true;
+        }
+    }
+
+    public function toggleFavoriteProduct($userId, $productName) {
+        $fav = $this->selectOne("
+            SELECT ufp.id 
+            FROM user_favorite_products ufp 
+            JOIN products p ON ufp.product_id = p.id 
+            WHERE ufp.user_id = ? AND p.name = ?
+            LIMIT 1
+        ", [$userId, $productName]);
+
+        if ($fav) {
+            $this->delete("
+                DELETE ufp FROM user_favorite_products ufp 
+                JOIN products p ON ufp.product_id = p.id 
+                WHERE ufp.user_id = ? AND p.name = ?
+            ", [$userId, $productName]);
+            return false;
+        } else {
+            $prod = $this->selectOne("SELECT id FROM products WHERE name = ? LIMIT 1", [$productName]);
+            if ($prod) {
+                $this->insert("INSERT INTO user_favorite_products (user_id, product_id) VALUES (?, ?)", [$userId, $prod['id']]);
+                return true;
+            }
+        }
+        return false;
     }
 
 } // Class End
