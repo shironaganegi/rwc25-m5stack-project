@@ -2,13 +2,58 @@
     padding: 20px;
     background-color: white;
 }
+
+/* タブスタイル */
+.search-tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+.tab-btn {
+    padding: 8px 20px;
+    border: 2px solid #ddd;
+    background: #f9f9f9;
+    border-radius: 20px;
+    color: #666;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 0.9rem;
+    transition: all 0.3s;
+}
+.tab-btn.active {
+    background: #f5c518; /* 黄色 */
+    border-color: #f5c518;
+    color: white;
+}
+.tab-btn:hover {
+    opacity: 0.8;
+}
+
+/* 検索フォーム */
+.favorites-search {
+    display: flex;
+    align-items: center;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 5px 10px;
+    background: #fff;
+}
 .favorites-search .search-arrow {
     color: #f5c518;
     font-weight: bold;
     font-size: 20px;
     margin-right: 8px;
-    padding: 0 5px;
+    cursor: pointer;
 }
+.search-input {
+    border: none;
+    outline: none;
+    flex: 1;
+    font-size: 1rem;
+    padding: 8px 0;
+}
+
+/* コンテンツエリア */
 .favorites-section {
     padding: 20px;
     background-color: white;
@@ -18,19 +63,65 @@
     font-weight: bold;
     margin-top: 0;
     margin-bottom: 20px;
+    border-left: 5px solid #f5c518;
+    padding-left: 10px;
 }
+
+/* 店舗・食材リスト共通スタイル */
 .store-list {
     display: flex;
     flex-direction: column;
     gap: 20px;
 }
-.food-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr); /* 4列のグリッド */
-    gap: 15px;
+.store-item {
+    display: flex;
+    align-items: center;
+    border: 1px solid #eee;
+    padding: 10px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
-.food-item {
+.store-logo {
+    width: 50px;
+    height: 50px;
+    object-fit: contain;
+    margin-right: 15px;
+}
+.store-details {
+    flex: 1;
+}
+.store-name {
+    font-weight: bold;
+    font-size: 1.1rem;
+    margin: 0; 
+}
+
+/* ハートアイコン */
+.heart-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.5rem;
+    color: #ccc; /* 未登録時はグレー */
+    transition: color 0.2s;
+    padding: 5px;
+}
+.heart-btn.active {
+    color: #e91e63; /* 登録時はピンク/赤 */
+}
+.heart-btn:hover {
+    transform: scale(1.1);
+}
+
+/* 検索結果エリア */
+.search-results-section {
+    padding: 20px;
+    background: white; /* 黄色(#fff9db)から白に変更 */
+}
+.no-results {
+    color: #666;
     text-align: center;
+    padding: 20px;
 }
 .food-item img {
     width: 100%;

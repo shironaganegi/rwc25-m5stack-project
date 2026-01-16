@@ -117,6 +117,11 @@ $expiringSalesCount = count($expiringSales);
         <?php endif; ?>
     </div>
 
+    <div class="card">
+        <div class="card-title">新しいセール情報を追加しませんか？</div>
+        <a href="../saleInput/saleInput.php" class="submit-button" style="margin-top: 10px;">セール情報入力へ</a>
+    </div>
+
     <a href="../saleInput/saleInput.php" class="menu-item" style="text-align: center; margin-top: 15px;">新しいセール情報を追加</a>
     <a href="" class="menu-item" style="text-align: center; margin-top: 15px;">セール情報</a>
     <a href="#" class="menu-item" style="text-align: center;">商品管理</a>

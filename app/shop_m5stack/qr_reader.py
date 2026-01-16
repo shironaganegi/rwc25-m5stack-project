@@ -227,6 +227,9 @@ class QRCodeScannerApp:
     # --- 「Clear」ボタン押下時のアクション ---
     # 読み取ったデータの履歴リストを空にし、画面表示を更新します
     def _on_clear_button_click(self):
+        #バックアップ用に現在のリストを保存、いらなかったら消していい
+        items = self.scanned_items[:]
+
         self.scanned_items.clear()
         self._update_data_display()
 
@@ -281,7 +284,9 @@ class QRCodeScannerApp:
             self.scanned_items.insert(0, scanned_str)
             if len(self.scanned_items) > MAX_LIST_ITEMS:
                 self.scanned_items.pop()
-            
+            #スキャンした時のリアルタイムな保存、これもいらなかったら消していい。
+            items = self.scanned_items[:]
+
             self._update_data_display()
             self.beep() 
         else:

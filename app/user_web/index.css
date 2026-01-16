@@ -1,62 +1,45 @@
-/* user_web/index.css (元 refrigerator.css の内容) */
+/* user_web/index.css */
 
 .search-section {
     padding: 20px;
     background-color: #f8f8f8;
     border-bottom: 1px solid #e0e0e0;
 }
+
+/* 画像セクション */
 .refrigerator-image-section {
     text-align: center;
     padding: 20px 0;
     background-color: white;
 }
 .refrigerator-image-container {
-    max-width: 20%;
+    max-width: 25%; /* 画像サイズを少し調整 */
     margin: 0 auto;
-    border: 4px solid #ffd700;
+    /* 枠線を外す場合はここを削除 */
+    /* border: 4px solid #ffd700; */
     display: flex;
     flex-direction: column;
 }
-.fridge-section {
-    cursor: pointer;
-    transition: filter 0.2s ease;
-    width: 100%;
-}
-.fridge-section img {
+
+/* 静的画像用のスタイル */
+.fridge-static-image img {
     display: block;
     width: 100%;
     height: auto;
 }
-.fridge-section:hover {
-    filter: brightness(1.1);
-}
-.fridge-section.active {
-   outline: 3px solid #007bff;
-   outline-offset: -3px;
-}
 
-/* --- アイテムリストエリア（スマホ向け調整） --- */
+/* --- アイテムリストエリア --- */
 .item-list-section {
-    padding: 15px; /* 左右の余白を少し詰める */
+    padding: 15px;
 }
 .list-header {
-    display: flex;
-    justify-content: space-between;
     padding: 0 10px;
     font-weight: bold;
-    color: #333; /* 色を濃く */
+    color: #333;
     margin-bottom: 15px;
-    font-size: 1.2rem; /* ヘッダー文字も大きく */
-    border-bottom: 2px solid #eee; /* 区切り線を強調 */
+    font-size: 1.2rem;
+    border-bottom: 2px solid #eee;
     padding-bottom: 8px;
-}
-.list-header .header-shelf {
-    width: auto; /* 固定幅をやめて自然に */
-}
-.list-header .header-details {
-    flex-grow: 1;
-    padding-left: 0; /* 左余白削除 */
-    text-align: right; /* 右寄せに */
 }
 
 .items-container {
@@ -72,12 +55,12 @@
     gap: 15px;
     padding: 15px 10px;
     border-bottom: 1px solid #eee;
+    background: #fff;
 }
 .fridge-item:last-child {
     border-bottom: none;
 }
 
-/* 画像サイズは維持しつつ、存在感を出す */
 .fridge-item .item-image {
     width: 70px;
     height: 70px;
@@ -209,4 +192,27 @@ input[type="date"].form-input {
     font-size: 1rem;
     text-align: center;
     font-weight: bold;
+}
+
+/* 検索コンテナ */
+.search-container {
+    display: flex;
+    align-items: center;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 10px;
+    background: #fff;
+    margin-bottom: 0;
+}
+.search-icon {
+    width: 24px;
+    height: 24px;
+    color: #888;
+    margin-right: 10px;
+}
+.search-input {
+    border: none;
+    outline: none;
+    font-size: 1rem;
+    flex-grow: 1;
 }

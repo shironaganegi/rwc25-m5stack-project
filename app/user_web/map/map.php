@@ -22,7 +22,6 @@ foreach ($stores_raw as $store) {
 
 // JavaScriptに渡すデータ
 $json_stores = json_encode($store_data_list, JSON_UNESCAPED_UNICODE);
-
 ?>
 <!DOCTYPE html>
 <html lang="ja">
@@ -33,11 +32,8 @@ $json_stores = json_encode($store_data_list, JSON_UNESCAPED_UNICODE);
     
     <link rel="stylesheet" href="/assets/css/common.css">
     <link rel="stylesheet" href="/map/style.css">
-    
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css" />
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
 </head>
 <body>
 
@@ -64,6 +60,8 @@ $json_stores = json_encode($store_data_list, JSON_UNESCAPED_UNICODE);
 
     <?php include $_SERVER['DOCUMENT_ROOT'] . '/assets/php/footer.php'; ?>
 
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
     <script>
         // ★ステップ2: PHPからJSONデータを受け取り、JavaScript変数として定義する
         const ALL_STORES_DATA = <?php echo $json_stores; ?>;

@@ -1,23 +1,64 @@
-// map.js
+
+// 1. 変数の宣言（'Identifier already declared' を防ぐため、ここでのみ宣言）
+// グローバル変数として保持することで、再初期化時に古い地図を削除できます
+if (typeof map === 'undefined') {
+    var map; 
+}
+let drawnItems;
+let propertyMarkers;
 
 document.addEventListener('DOMContentLoaded', function () {
-    // 1. マップの初期化
-    const map = L.map('mapid').setView([34.65200, 135.586964], 15); // 近畿大学（東大阪キャンパス）を中心に設定
+    console.log("DOMの読み込み完了。地図を初期化します。");
 
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 19,
-        attribution: '© OpenStreetMap contributors'
-    }).addTo(map);
+    // 1. 地図コンテナの存在確認
+    const mapContainer = document.getElementById('mapid');
+    if (!mapContainer) {
+        console.error("エラー: id='mapid' のHTML要素が見つかりません。");
+        return;
+    }
 
-    // 2. 描画機能（Leaflet.draw）の準備とコントロール
-    const drawnItems = new L.FeatureGroup();
-    map.addLayer(drawnItems);
+    // 2. 既存の地図の破棄（'Map container is already initialized' エラー対策）
+    if (typeof map !== 'undefined' && map) {
+        map.remove();
+        console.log("既存の地図オブジェクトを破棄しました。");
+    }
+
+    // 3. 地図の初期化
+    try {
+        map = L.map('mapid').setView([34.65200, 135.586964], 15); // 近畿大学（東大阪キャンパス）を中心に設定
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
+        // レイヤーグループの作成
+        drawnItems = new L.FeatureGroup().addTo(map);
+
+        // 4. Leaflet.drawの設定
+        initDrawTools();
+
+    } catch (error) {
+        console.error("地図の初期化中にエラーが発生しました:", error);
+    }
+});
+
+/**
+ * 描画ツールの設定とイベント登録
+ */
+function initDrawTools() {
+    // ライブラリの存在チェック（'L.PolyUtil' エラー対策）
+    if (!L.Control.Draw || !L.PolyUtil) {
+        console.error("エラー: Leaflet.drawライブラリが読み込まれていません。");
+        return;
+    }
 
     const drawControl = new L.Control.Draw({
         edit: { featureGroup: drawnItems },
         draw: {
             polygon: {
-                shapeOptions: { color: '#38a169', weight: 3, opacity: 0.8 }, allowIntersection: false,
+                shapeOptions: { color: '#38a169', weight: 3, opacity: 0.8 }, 
+                allowIntersection: false,
                 // ★変更点: ツールチップメッセージをカスタマイズ
                 repeatMode: true, // 連続描画を可能にする
                 showLength: true,
@@ -54,6 +95,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // 4. ポリゴン描画完了時のイベントハンドリング
     map.on(L.Draw.Event.CREATED, function (e) {
+        console.log("描画が完了しました。");
         // 既存のポリゴンをクリア
         drawnItems.clearLayers();
         drawnItems.addLayer(e.layer);
@@ -65,14 +107,18 @@ document.addEventListener('DOMContentLoaded', function () {
             if (latlngs.length < 3) {
                 alert('ポリゴンを形成するには、最低3点が必要です。');
                 drawnItems.clearLayers();
-                document.getElementById('polygon_coords').value = '';
-                document.getElementById('selected_ids').value = '';
-                document.getElementById('search-btn').disabled = true;
+                const polygonCoordsInput = document.getElementById('polygon_coords');
+                const selectedIdsInput = document.getElementById('selected_ids');
+                const searchBtn = document.getElementById('search-btn');
+                if (polygonCoordsInput) polygonCoordsInput.value = '';
+                if (selectedIdsInput) selectedIdsInput.value = '';
+                if (searchBtn) searchBtn.disabled = true;
                 return; // 処理を終了
             }
 
             const coordinates = latlngs.map(latlng => `${latlng.lat},${latlng.lng}`).join('|');
-            document.getElementById('polygon_coords').value = coordinates;
+            const polygonCoordsInput = document.getElementById('polygon_coords');
+            if (polygonCoordsInput) polygonCoordsInput.value = coordinates;
 
             // 囲まれた店舗IDを抽出
             const insideStoreIds = [];
@@ -124,18 +170,28 @@ document.addEventListener('DOMContentLoaded', function () {
             });
 
             // 抽出したIDリストをカンマ区切り文字列にして隠しフィールドにセット
-            document.getElementById('selected_ids').value = insideStoreIds.join(',');
-
+            const selectedIdsInput = document.getElementById('selected_ids');
+            const searchBtn = document.getElementById('search-btn');
+            if (selectedIdsInput) selectedIdsInput.value = insideStoreIds.join(',');
+            
             // 検索ボタンを有効化
-            document.getElementById('search-btn').disabled = false;
+            if (searchBtn) {
+                searchBtn.disabled = false;
+                searchBtn.textContent = `選択された ${insideStoreIds.length} 件を表示`;
+            }
+            
+            console.log("判定完了。選択ID:", insideStoreIds);
         }
     });
 
     // 5. その他のイベント処理（削除、検索ボタンクリック）
     map.on(L.Draw.Event.DELETED, function (e) {
-        document.getElementById('polygon_coords').value = '';
-        document.getElementById('selected_ids').value = '';
-        document.getElementById('search-btn').disabled = true;
+        const polygonCoordsInput = document.getElementById('polygon_coords');
+        const selectedIdsInput = document.getElementById('selected_ids');
+        const searchBtn = document.getElementById('search-btn');
+        if (polygonCoordsInput) polygonCoordsInput.value = '';
+        if (selectedIdsInput) selectedIdsInput.value = '';
+        if (searchBtn) searchBtn.disabled = true;
         // 全てのハイライトを解除
         storeMarkers.eachLayer(function (marker) {
             if (marker._icon) {
@@ -144,11 +200,16 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
-    document.getElementById('search-btn').addEventListener('click', function () {
-        if (document.getElementById('polygon_coords').value) {
-            document.getElementById('search-form').submit();
-        } else {
-            alert('検索エリアを囲んでください。');
-        }
-    });
-});
+    const searchBtn = document.getElementById('search-btn');
+    if (searchBtn) {
+        searchBtn.addEventListener('click', function () {
+            const polygonCoordsInput = document.getElementById('polygon_coords');
+            if (polygonCoordsInput && polygonCoordsInput.value) {
+                const searchForm = document.getElementById('search-form');
+                if (searchForm) searchForm.submit();
+            } else {
+                alert('検索エリアを囲んでください。');
+            }
+        });
+    }
+}
