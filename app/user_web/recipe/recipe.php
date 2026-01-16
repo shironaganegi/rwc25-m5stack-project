@@ -6,6 +6,7 @@ $search_keyword = trim($_GET['s'] ?? '');
 
 $recipes_to_display = [];
 $error_message = '';
+$use_json_fallback = false;
 
 try {
     $db = Database::getInstance();
@@ -21,6 +22,46 @@ try {
     } else {
         // 【通常時】ランダムに20件選ぶ
         $recipes_to_display = $db->select("SELECT * FROM recipes ORDER BY RAND() LIMIT 20");
+    }
+    
+    // データベースにデータがない場合、JSONファイルから読み込む
+    if (empty($recipes_to_display)) {
+        $jsonFile = __DIR__ . '/recipes.json';
+        if (file_exists($jsonFile)) {
+            $jsonData = file_get_contents($jsonFile);
+            $recipes_json = json_decode($jsonData, true);
+            
+            if ($recipes_json && is_array($recipes_json)) {
+                $use_json_fallback = true;
+                
+                if (!empty($search_keyword)) {
+                    // 検索キーワードでフィルタリング
+                    $filtered = [];
+                    foreach ($recipes_json as $recipe) {
+                        $name_match = stripos($recipe['strMeal'] ?? '', $search_keyword) !== false;
+                        $ingredient_match = false;
+                        
+                        // 材料をチェック
+                        for ($i = 1; $i <= 20; $i++) {
+                            $ingredient = $recipe["strIngredient{$i}"] ?? '';
+                            if (!empty($ingredient) && stripos($ingredient, $search_keyword) !== false) {
+                                $ingredient_match = true;
+                                break;
+                            }
+                        }
+                        
+                        if ($name_match || $ingredient_match) {
+                            $filtered[] = $recipe;
+                        }
+                    }
+                    $recipes_to_display = array_slice($filtered, 0, 20);
+                } else {
+                    // ランダムに20件選ぶ
+                    shuffle($recipes_json);
+                    $recipes_to_display = array_slice($recipes_json, 0, 20);
+                }
+            }
+        }
     }
 } catch (Exception $e) {
     $error_message = "データベースエラー: " . $e->getMessage();
@@ -51,9 +92,9 @@ try {
             <?php if (!empty($recipes_to_display)): ?>
                 <div class="recipe-grid">
                     <?php foreach ($recipes_to_display as $recipe): ?>
-                        <a href="/recipe/recipe_detail.php?id=<?php echo htmlspecialchars($recipe['id'] ?? ''); ?>" class="recipe-item">
-                            <img src="<?php echo htmlspecialchars($recipe['thumbnail_url'] ?? ''); ?>/preview" alt="<?php echo htmlspecialchars($recipe['name'] ?? ''); ?>">
-                            <p><?php echo htmlspecialchars($recipe['name'] ?? ''); ?></p>
+                        <a href="/recipe/recipe_detail.php?<?php echo $use_json_fallback ? 'external_id=' . htmlspecialchars($recipe['idMeal'] ?? '') : 'id=' . htmlspecialchars($recipe['id'] ?? ''); ?>" class="recipe-item">
+                            <img src="<?php echo htmlspecialchars($use_json_fallback ? ($recipe['strMealThumb'] ?? '') : ($recipe['thumbnail_url'] ?? '')); ?><?php echo $use_json_fallback ? '' : '/preview'; ?>" alt="<?php echo htmlspecialchars($use_json_fallback ? ($recipe['strMeal'] ?? '') : ($recipe['name'] ?? '')); ?>">
+                            <p><?php echo htmlspecialchars($use_json_fallback ? ($recipe['strMeal'] ?? '') : ($recipe['name'] ?? '')); ?></p>
                         </a>
                     <?php endforeach; ?>
                 </div>

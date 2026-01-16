@@ -2,7 +2,7 @@
 
 document.addEventListener('DOMContentLoaded', function() {
     // 1. マップの初期化
-    const map = L.map('mapid').setView([35.6895, 139.7500], 12); // 初期表示座標を指定
+    const map = L.map('mapid').setView([34.65200, 135.586964], 15); // 近畿大学（東大阪キャンパス）を中心に設定
     
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 19,
