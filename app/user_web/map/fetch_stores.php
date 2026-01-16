@@ -220,21 +220,43 @@ try {
             // 住所を取得
             $address = $store['address'] ?? '';
             
-            // 既存店舗チェック（名前と座標で判定）
+            // 既存店舗チェック（名前と座標の両方で判定）
+            // 座標の閾値: 0.0001度 ≈ 約11メートル（調整可能）
+            $coordinate_threshold = 0.0001;
+            
             $stmt = $pdo->prepare("
-                SELECT id FROM stores 
-                WHERE name = ? 
-                OR (ABS(latitude - ?) < 0.0001 AND ABS(longitude - ?) < 0.0001)
+                SELECT id, name, latitude, longitude FROM stores 
+                WHERE (
+                    name = ? 
+                    AND ABS(latitude - ?) < ? 
+                    AND ABS(longitude - ?) < ?
+                )
             ");
-            $stmt->execute([$name, $lat, $lng]);
+            $stmt->execute([$name, $lat, $coordinate_threshold, $lng, $coordinate_threshold]);
             $existingStore = $stmt->fetch();
             
             if ($existingStore) {
                 $skippedCount++;
-                if (($index + 1) % 10 == 0) {
-                    echo "処理中... " . ($index + 1) . "/" . count($stores) . " (スキップ: {$name})\n";
+                $reason = "既存店舗と一致 (ID: {$existingStore['id']}, 名前: {$existingStore['name']})";
+                if (($index + 1) % 10 == 0 || $skippedCount <= 5) {
+                    echo "スキップ: {$name} - {$reason}\n";
                 }
                 continue;
+            }
+            
+            // 座標のみの重複チェック（同じ場所に別名の店舗がある場合の警告用）
+            $stmt = $pdo->prepare("
+                SELECT id, name FROM stores 
+                WHERE ABS(latitude - ?) < ? 
+                AND ABS(longitude - ?) < ?
+                AND name != ?
+            ");
+            $stmt->execute([$lat, $coordinate_threshold, $lng, $coordinate_threshold, $name]);
+            $nearbyStore = $stmt->fetch();
+            
+            if ($nearbyStore) {
+                // 警告のみ（登録は継続）
+                echo "警告: {$name} は既存店舗「{$nearbyStore['name']}」(ID: {$nearbyStore['id']}) と近い位置にあります\n";
             }
             
             // 店舗情報を挿入
