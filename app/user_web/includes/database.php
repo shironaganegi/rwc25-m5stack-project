@@ -17,6 +17,9 @@ class Database {
     
     private function __construct() {
         try {
+            // #region agent log
+            file_put_contents('c:\Users\user\GitHub\RWC25-group07\.cursor\debug.log', json_encode(['id'=>'log_'.time().'_conn','timestamp'=>time()*1000,'location'=>'database.php:18','message'=>'DB接続開始','data'=>['host'=>self::HOST,'dbname'=>self::DBNAME,'username'=>self::USERNAME],'sessionId'=>'debug-session','runId'=>'run1','hypothesisId'=>'A,B,C'])."\n", FILE_APPEND);
+            // #endregion
             $this->connection = new PDO(
                 "mysql:host=" . self::HOST . ";port=" . self::PORT . ";dbname=" . self::DBNAME . ";charset=utf8mb4",
                 self::USERNAME,
@@ -27,7 +30,14 @@ class Database {
                     PDO::ATTR_EMULATE_PREPARES => false,
                 ]
             );
+            // #region agent log
+            $tables = $this->connection->query("SHOW TABLES")->fetchAll(PDO::FETCH_COLUMN);
+            file_put_contents('c:\Users\user\GitHub\RWC25-group07\.cursor\debug.log', json_encode(['id'=>'log_'.time().'_tables','timestamp'=>time()*1000,'location'=>'database.php:33','message'=>'存在するテーブル一覧','data'=>['tables'=>$tables,'sale_stores_exists'=>in_array('sale_stores',$tables)],'sessionId'=>'debug-session','runId'=>'run1','hypothesisId'=>'A,C'])."\n", FILE_APPEND);
+            // #endregion
         } catch (PDOException $e) {
+            // #region agent log
+            file_put_contents('c:\Users\user\GitHub\RWC25-group07\.cursor\debug.log', json_encode(['id'=>'log_'.time().'_conn_err','timestamp'=>time()*1000,'location'=>'database.php:35','message'=>'DB接続エラー','data'=>['error'=>$e->getMessage()],'sessionId'=>'debug-session','runId'=>'run1','hypothesisId'=>'A,B,C'])."\n", FILE_APPEND);
+            // #endregion
             throw new Exception("データベース接続エラー: " . $e->getMessage());
         }
     }
@@ -45,9 +55,23 @@ class Database {
     
     // 基本メソッド
     public function select($sql, $params = []) {
-        $stmt = $this->connection->prepare($sql);
-        $stmt->execute($params);
-        return $stmt->fetchAll();
+        // #region agent log
+        file_put_contents('c:\Users\user\GitHub\RWC25-group07\.cursor\debug.log', json_encode(['id'=>'log_'.time().'_select_pre','timestamp'=>time()*1000,'location'=>'database.php:47','message'=>'SQL実行前','data'=>['sql'=>substr($sql,0,200),'params'=>$params,'has_sale_stores'=>strpos($sql,'sale_stores')!==false],'sessionId'=>'debug-session','runId'=>'run1','hypothesisId'=>'A,C'])."\n", FILE_APPEND);
+        // #endregion
+        try {
+            $stmt = $this->connection->prepare($sql);
+            $stmt->execute($params);
+            $result = $stmt->fetchAll();
+            // #region agent log
+            file_put_contents('c:\Users\user\GitHub\RWC25-group07\.cursor\debug.log', json_encode(['id'=>'log_'.time().'_select_success','timestamp'=>time()*1000,'location'=>'database.php:50','message'=>'SQL実行成功','data'=>['row_count'=>count($result)],'sessionId'=>'debug-session','runId'=>'run1','hypothesisId'=>'A,C'])."\n", FILE_APPEND);
+            // #endregion
+            return $result;
+        } catch (PDOException $e) {
+            // #region agent log
+            file_put_contents('c:\Users\user\GitHub\RWC25-group07\.cursor\debug.log', json_encode(['id'=>'log_'.time().'_select_err','timestamp'=>time()*1000,'location'=>'database.php:52','message'=>'SQL実行エラー','data'=>['error'=>$e->getMessage(),'code'=>$e->getCode(),'sql'=>substr($sql,0,200)],'sessionId'=>'debug-session','runId'=>'run1','hypothesisId'=>'A,C'])."\n", FILE_APPEND);
+            // #endregion
+            throw $e;
+        }
     }
     
     public function selectOne($sql, $params = []) {
@@ -125,6 +149,9 @@ class Database {
      * 単品検索用（安い順）
      */
     public function searchCheapestSales($keyword = null) {
+        // #region agent log
+        file_put_contents('c:\Users\user\GitHub\RWC25-group07\.cursor\debug.log', json_encode(['id'=>'log_'.time().'_search_start','timestamp'=>time()*1000,'location'=>'database.php:127','message'=>'searchCheapestSales開始','data'=>['keyword'=>$keyword],'sessionId'=>'debug-session','runId'=>'run1','hypothesisId'=>'A,C'])."\n", FILE_APPEND);
+        // #endregion
         $sql = "
             SELECT
                 p.name as product_name,

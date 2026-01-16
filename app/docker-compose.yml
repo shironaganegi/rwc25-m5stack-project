@@ -44,7 +44,7 @@ services:
     volumes:
       - ./server/admin:/var/www/html
     ports:
-      - "9000:80"
+      - "9001:80"
     environment:
       - TZ=Asia/Tokyo
     depends_on:
@@ -64,7 +64,7 @@ services:
       MYSQL_DATABASE: ${DOCKER_DB_DATABASE:-supermarket_app}
       MYSQL_TCP_PORT: 3306
     ports:
-      - "${DOCKER_DB_PORT:-3306}:3306"
+      - "${DOCKER_DB_PORT:-3307}:3306"
     volumes:
       - ./server/docker/mysql/init:/docker-entrypoint-initdb.d
       - laravel-railway-mysql-data:/var/lib/mysql:cached
