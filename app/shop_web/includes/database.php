@@ -105,6 +105,18 @@ class Database {
     }
     
     /**
+     * 前日の売上合計を取得
+     */
+    public function getYesterdaysSales() {
+        return $this->selectOne("
+            SELECT SUM(total_amount) as total_sales,
+                   COUNT(*) as transaction_count
+            FROM sales_data 
+            WHERE sale_date = DATE_SUB(CURDATE(), INTERVAL 1 DAY)
+        ");
+    }
+    
+    /**
      * 売上目標と達成率を取得
      */
     public function getSalesTarget() {
