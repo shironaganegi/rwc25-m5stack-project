@@ -348,6 +348,110 @@ class Database {
         return $this->select("SELECT id, name, address, latitude, longitude, category FROM stores WHERE id IN ($placeholders)", $storeIds);
     }
 
+    /**
+     * お気に入り店舗を取得
+     */
+    public function getFavoriteStores($userId) {
+        return $this->select("
+            SELECT s.id, s.name, s.address, s.latitude, s.longitude, s.category, ufs.created_at
+            FROM user_favorite_stores ufs
+            JOIN stores s ON ufs.store_id = s.id
+            WHERE ufs.user_id = ?
+            ORDER BY ufs.created_at DESC
+        ", [$userId]);
+    }
+
+    /**
+     * お気に入り商品を取得
+     */
+    public function getFavoriteProducts($userId) {
+        return $this->select("
+            SELECT p.id, p.name, p.regular_price, c.name as category_name, ufp.created_at
+            FROM user_favorite_products ufp
+            JOIN products p ON ufp.product_id = p.id
+            LEFT JOIN categories c ON p.category_id = c.id
+            WHERE ufp.user_id = ?
+            ORDER BY ufp.created_at DESC
+        ", [$userId]);
+    }
+
+    /**
+     * お気に入り店舗を追加
+     */
+    public function addFavoriteStore($userId, $storeId) {
+        try {
+            return $this->insert("
+                INSERT INTO user_favorite_stores (user_id, store_id) 
+                VALUES (?, ?)
+            ", [$userId, $storeId]);
+        } catch (PDOException $e) {
+            // 既に存在する場合はエラーを無視（UNIQUE制約）
+            if ($e->getCode() == 23000) {
+                return false;
+            }
+            throw $e;
+        }
+    }
+
+    /**
+     * お気に入り店舗を削除
+     */
+    public function removeFavoriteStore($userId, $storeId) {
+        return $this->delete("
+            DELETE FROM user_favorite_stores 
+            WHERE user_id = ? AND store_id = ?
+        ", [$userId, $storeId]);
+    }
+
+    /**
+     * お気に入り商品を追加
+     */
+    public function addFavoriteProduct($userId, $productId) {
+        try {
+            return $this->insert("
+                INSERT INTO user_favorite_products (user_id, product_id) 
+                VALUES (?, ?)
+            ", [$userId, $productId]);
+        } catch (PDOException $e) {
+            // 既に存在する場合はエラーを無視（UNIQUE制約）
+            if ($e->getCode() == 23000) {
+                return false;
+            }
+            throw $e;
+        }
+    }
+
+    /**
+     * お気に入り商品を削除
+     */
+    public function removeFavoriteProduct($userId, $productId) {
+        return $this->delete("
+            DELETE FROM user_favorite_products 
+            WHERE user_id = ? AND product_id = ?
+        ", [$userId, $productId]);
+    }
+
+    /**
+     * 店舗のセール情報を取得（簡易版）
+     * セールが存在するかどうかのみを返す
+     */
+    public function getStoreSaleTimes($storeId) {
+        $result = $this->selectOne("
+            SELECT COUNT(*) as count
+            FROM sales s
+            JOIN sale_stores ss ON s.id = ss.sale_id
+            WHERE ss.store_id = ? 
+            AND s.is_active = 1
+            AND s.start_date <= CURDATE()
+            AND s.end_date >= CURDATE()
+        ", [$storeId]);
+        
+        if ($result && $result['count'] > 0) {
+            return [['has_sale' => true]];
+        }
+        return [];
+    }
+
 } // Class End
 
 function getDB() { return Database::getInstance(); }

@@ -46,3 +46,71 @@
     font-weight: 500;
     font-size: 0.9em;
 }
+.store-item {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 15px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    background-color: #fafafa;
+}
+.store-logo {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 8px;
+}
+.store-details {
+    flex: 1;
+}
+.store-details .sale-time {
+    font-size: 0.85em;
+    color: #666;
+    margin: 0 0 5px 0;
+}
+.store-details .store-name {
+    font-weight: bold;
+    font-size: 1.1em;
+    margin: 0 0 5px 0;
+}
+.store-details .store-distance {
+    font-size: 0.9em;
+    color: #666;
+    margin: 0;
+}
+.congestion-info {
+    text-align: center;
+    padding: 10px;
+    background-color: #f0f0f0;
+    border-radius: 5px;
+}
+.congestion-label {
+    font-size: 0.8em;
+    color: #666;
+    margin: 0 0 5px 0;
+}
+.congestion-value {
+    font-size: 1.2em;
+    font-weight: bold;
+    margin: 0;
+}
+.remove-button {
+    transition: background-color 0.2s;
+}
+.remove-button:hover {
+    background-color: #c82333 !important;
+}
+.message {
+    animation: fadeIn 0.3s;
+}
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
