@@ -146,16 +146,21 @@ try {
                 ", [$productId, $salePrice, $startDate, $endDate, $notes, $userId]);
                 $saleIds[] = $saleId;
                 
-                // セール対象店舗を設定（最初の店舗に設定）
+                // セール対象店舗を設定（複数店舗に関連付け）
                 if (!empty($storeIds)) {
-                    $storeId = $storeIds[0];
-                    try {
-                        $db->insert("
-                            INSERT INTO sale_stores (sale_id, store_id) 
-                            VALUES (?, ?)
-                        ", [$saleId, $storeId]);
-                    } catch (Exception $e) {
-                        // 既に存在する場合はスキップ
+                    // ランダムに1〜3店舗を選択
+                    $selectedStoreCount = min(rand(1, 3), count($storeIds));
+                    $selectedStores = array_slice($storeIds, 0, $selectedStoreCount);
+                    
+                    foreach ($selectedStores as $storeId) {
+                        try {
+                            $db->insert("
+                                INSERT INTO sale_stores (sale_id, store_id) 
+                                VALUES (?, ?)
+                            ", [$saleId, $storeId]);
+                        } catch (Exception $e) {
+                            // 既に存在する場合はスキップ
+                        }
                     }
                 }
                 
@@ -165,82 +170,160 @@ try {
     }
     echo "  セール数: " . count($saleIds) . "件\n\n";
     
-    // 5. 売上データの追加（今日と前日）
+    // 5. 売上データの追加（過去3ヶ月分の日別データを生成）
     echo "5. 売上データを追加中...\n";
     $today = date('Y-m-d');
-    $yesterday = date('Y-m-d', strtotime('-1 day'));
     
-    // 今日の売上データを確認
-    $todaySales = $db->selectOne("SELECT COUNT(*) as count FROM sales_data WHERE sale_date = ?", [$today]);
-    if ($todaySales['count'] == 0) {
-        // 今日の売上データを追加
-        $todayProducts = ['りんご', 'トマト', '牛乳', '鶏もも肉', 'コーヒー', '洗剤', '冷凍うどん', 'チョコレート'];
-        $todayTotal = 0;
-        foreach ($todayProducts as $productName) {
-            $productId = $productMap[$productName] ?? null;
-            if ($productId) {
-                $quantity = rand(1, 5);
-                $unitPrice = rand(100, 500);
-                $totalAmount = $quantity * $unitPrice;
-                $todayTotal += $totalAmount;
-                
-                $db->insert("
-                    INSERT INTO sales_data (product_id, quantity_sold, unit_price, total_amount, sale_date, user_id) 
-                    VALUES (?, ?, ?, ?, ?, ?)
-                ", [$productId, $quantity, $unitPrice, $totalAmount, $today, $userId]);
-            }
-        }
-        echo "  今日の売上データ追加: " . number_format($todayTotal) . "円\n";
-    } else {
-        echo "  今日の売上データは既に存在します\n";
-    }
+    // 過去3ヶ月分のデータを生成
+    $startDate = date('Y-m-d', strtotime('-3 months'));
+    $endDate = $today;
     
-    // 前日の売上データを確認
-    $yesterdaySales = $db->selectOne("SELECT COUNT(*) as count FROM sales_data WHERE sale_date = ?", [$yesterday]);
-    if ($yesterdaySales['count'] == 0) {
-        // 前日の売上データを追加（今日より少し少なめ）
-        $yesterdayProducts = ['りんご', 'バナナ', '牛乳', 'ヨーグルト', 'コーヒー'];
-        $yesterdayTotal = 0;
-        foreach ($yesterdayProducts as $productName) {
-            $productId = $productMap[$productName] ?? null;
-            if ($productId) {
-                $quantity = rand(1, 4);
-                $unitPrice = rand(100, 450);
-                $totalAmount = $quantity * $unitPrice;
-                $yesterdayTotal += $totalAmount;
-                
-                $db->insert("
-                    INSERT INTO sales_data (product_id, quantity_sold, unit_price, total_amount, sale_date, user_id) 
-                    VALUES (?, ?, ?, ?, ?, ?)
-                ", [$productId, $quantity, $unitPrice, $totalAmount, $yesterday, $userId]);
+    // 既存データを確認
+    $existingData = $db->selectOne("
+        SELECT COUNT(DISTINCT sale_date) as count 
+        FROM sales_data 
+        WHERE sale_date >= ? AND sale_date <= ?
+    ", [$startDate, $endDate]);
+    
+    if ($existingData['count'] < 30) {
+        // 人気商品リスト（売上に影響を与える商品）
+        $popularProducts = [
+            'りんご' => ['base_price' => 150, 'popularity' => 8],
+            'トマト' => ['base_price' => 200, 'popularity' => 7],
+            '牛乳' => ['base_price' => 198, 'popularity' => 9],
+            '鶏もも肉' => ['base_price' => 398, 'popularity' => 6],
+            'コーヒー' => ['base_price' => 298, 'popularity' => 8],
+            '洗剤' => ['base_price' => 380, 'popularity' => 5],
+            '冷凍うどん' => ['base_price' => 120, 'popularity' => 7],
+            'チョコレート' => ['base_price' => 200, 'popularity' => 6],
+            'バナナ' => ['base_price' => 120, 'popularity' => 7],
+            'ヨーグルト' => ['base_price' => 128, 'popularity' => 8],
+            '卵' => ['base_price' => 250, 'popularity' => 9],
+            'おにぎり' => ['base_price' => 120, 'popularity' => 8],
+            '弁当' => ['base_price' => 450, 'popularity' => 7],
+            'レタス' => ['base_price' => 150, 'popularity' => 5],
+            'お茶' => ['base_price' => 128, 'popularity' => 6]
+        ];
+        
+        $totalGenerated = 0;
+        $currentDate = strtotime($startDate);
+        $endTimestamp = strtotime($endDate);
+        
+        while ($currentDate <= $endTimestamp) {
+            $dateStr = date('Y-m-d', $currentDate);
+            $dayOfWeek = date('w', $currentDate); // 0=日曜, 6=土曜
+            
+            // 既にデータがある日はスキップ
+            $existing = $db->selectOne("SELECT COUNT(*) as count FROM sales_data WHERE sale_date = ?", [$dateStr]);
+            if ($existing['count'] > 0) {
+                $currentDate = strtotime('+1 day', $currentDate);
+                continue;
             }
+            
+            // 週末は売上が高め、平日は低め
+            $weekendMultiplier = ($dayOfWeek == 0 || $dayOfWeek == 6) ? 1.3 : 1.0;
+            
+            // 1日あたりの取引数を決定（週末は多め）
+            $transactionCount = ($dayOfWeek == 0 || $dayOfWeek == 6) ? rand(15, 25) : rand(10, 18);
+            
+            $dailyTotal = 0;
+            
+            for ($i = 0; $i < $transactionCount; $i++) {
+                // 商品をランダムに選択（人気度に基づいて重み付け）
+                $selectedProduct = null;
+                $selectedProductName = null;
+                $rand = rand(1, 100);
+                $cumulative = 0;
+                
+                foreach ($popularProducts as $productName => $info) {
+                    $productId = $productMap[$productName] ?? null;
+                    if ($productId) {
+                        $cumulative += $info['popularity'];
+                        if ($rand <= $cumulative) {
+                            $selectedProduct = $productId;
+                            $selectedProductName = $productName;
+                            break;
+                        }
+                    }
+                }
+                
+                if ($selectedProduct && $selectedProductName) {
+                    $basePrice = $popularProducts[$selectedProductName]['base_price'];
+                    $quantity = rand(1, 5);
+                    // 価格に変動を加える（±20%）
+                    $priceVariation = 1 + (rand(-20, 20) / 100);
+                    $unitPrice = round($basePrice * $priceVariation * $weekendMultiplier);
+                    $totalAmount = $quantity * $unitPrice;
+                    $dailyTotal += $totalAmount;
+                    
+                    $db->insert("
+                        INSERT INTO sales_data (product_id, quantity_sold, unit_price, total_amount, sale_date, user_id) 
+                        VALUES (?, ?, ?, ?, ?, ?)
+                    ", [$selectedProduct, $quantity, $unitPrice, $totalAmount, $dateStr, $userId]);
+                }
+            }
+            
+            $totalGenerated++;
+            if ($totalGenerated % 10 == 0) {
+                echo "  {$dateStr} のデータを生成 (売上: " . number_format($dailyTotal) . "円)\n";
+            }
+            
+            $currentDate = strtotime('+1 day', $currentDate);
         }
-        echo "  前日の売上データ追加: " . number_format($yesterdayTotal) . "円\n";
+        
+        echo "  過去3ヶ月分の売上データを生成しました: {$totalGenerated}日分\n";
     } else {
-        echo "  前日の売上データは既に存在します\n";
+        echo "  売上データは既に十分に存在します (" . $existingData['count'] . "日分)\n";
     }
     echo "\n";
     
-    // 6. 売上目標データの追加
-    echo "6. 売上目標データを確認中...\n";
-    $target = $db->selectOne("SELECT id FROM sales_targets WHERE target_date = ?", [$today]);
-    if (!$target) {
-        $db->insert("
-            INSERT INTO sales_targets (target_amount, target_period, target_date, user_id) 
-            VALUES (?, 'daily', ?, ?)
-        ", [580000, $today, $userId]);
-        echo "  今日の売上目標を追加: 580,000円\n";
-    } else {
-        echo "  今日の売上目標は既に存在します\n";
+    // 6. 売上目標データの追加（過去3ヶ月分の日次目標）
+    echo "6. 売上目標データを追加中...\n";
+    $today = date('Y-m-d');
+    
+    // 過去3ヶ月分の日次目標を生成
+    $targetStartDate = date('Y-m-d', strtotime('-3 months'));
+    $targetEndDate = $today;
+    
+    $targetDate = strtotime($targetStartDate);
+    $targetEndTimestamp = strtotime($targetEndDate);
+    $targetCount = 0;
+    
+    // ベース目標額（平日と週末で変動）
+    $baseDailyTarget = 580000;
+    
+    while ($targetDate <= $targetEndTimestamp) {
+        $dateStr = date('Y-m-d', $targetDate);
+        $dayOfWeek = date('w', $targetDate);
+        
+        // 既存チェック
+        $existing = $db->selectOne("SELECT id FROM sales_targets WHERE target_date = ?", [$dateStr]);
+        if (!$existing) {
+            // 週末は目標を高めに設定
+            $dailyTarget = ($dayOfWeek == 0 || $dayOfWeek == 6) 
+                ? round($baseDailyTarget * 1.2) 
+                : $baseDailyTarget;
+            
+            // 月によって目標を微調整（月の後半は高め）
+            $dayOfMonth = date('d', $targetDate);
+            if ($dayOfMonth > 20) {
+                $dailyTarget = round($dailyTarget * 1.1);
+            }
+            
+            $db->insert("
+                INSERT INTO sales_targets (target_amount, target_period, target_date, user_id) 
+                VALUES (?, 'daily', ?, ?)
+            ", [$dailyTarget, $dateStr, $userId]);
+            $targetCount++;
+        }
+        
+        $targetDate = strtotime('+1 day', $targetDate);
     }
     
-    $yesterdayTarget = $db->selectOne("SELECT id FROM sales_targets WHERE target_date = ?", [$yesterday]);
-    if (!$yesterdayTarget) {
-        $db->insert("
-            INSERT INTO sales_targets (target_amount, target_period, target_date, user_id) 
-            VALUES (?, 'daily', ?, ?)
-        ", [550000, $yesterday, $userId]);
-        echo "  前日の売上目標を追加: 550,000円\n";
+    if ($targetCount > 0) {
+        echo "  過去3ヶ月分の売上目標を追加: {$targetCount}日分\n";
+    } else {
+        echo "  売上目標データは既に存在します\n";
     }
     echo "\n";
     
@@ -286,13 +369,37 @@ try {
     // トランザクションコミット
     $pdo->commit();
     
+    // 統計情報を取得
+    $salesDataCount = $db->selectOne("SELECT COUNT(DISTINCT sale_date) as count FROM sales_data");
+    $totalSalesAmount = $db->selectOne("SELECT SUM(total_amount) as total FROM sales_data");
+    $targetDataCount = $db->selectOne("SELECT COUNT(DISTINCT target_date) as count FROM sales_targets");
+    
     echo "=== ダミーデータ生成完了 ===\n\n";
-    echo "生成されたデータ:\n";
-    echo "- カテゴリ: " . count($categoryMap) . "件\n";
-    echo "- 商品: " . count($productMap) . "件\n";
-    echo "- セール: " . count($saleIds) . "件\n";
-    echo "- お気に入り店舗: {$favStoreCount}件\n";
-    echo "- お気に入り商品: {$favProductCount}件\n";
+    echo "📊 生成されたデータサマリー:\n";
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n";
+    echo "📁 マスタデータ:\n";
+    echo "   - カテゴリ: " . count($categoryMap) . "件\n";
+    echo "   - 商品: " . count($productMap) . "件\n";
+    echo "   - 店舗: " . count($storeIds) . "件\n";
+    echo "\n";
+    echo "💰 売上データ:\n";
+    echo "   - 売上記録日数: " . ($salesDataCount['count'] ?? 0) . "日分\n";
+    echo "   - 総売上金額: " . number_format($totalSalesAmount['total'] ?? 0) . "円\n";
+    echo "   - 売上目標データ: " . ($targetDataCount['count'] ?? 0) . "日分\n";
+    echo "\n";
+    echo "🏷️ セール情報:\n";
+    echo "   - アクティブセール: " . count($saleIds) . "件\n";
+    echo "\n";
+    echo "⭐ お気に入りデータ:\n";
+    echo "   - お気に入り店舗: {$favStoreCount}件\n";
+    echo "   - お気に入り商品: {$favProductCount}件\n";
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n";
+    echo "\n";
+    echo "✅ 分析画面で以下の期間を確認できます:\n";
+    echo "   - 今月: " . date('Y年m月') . "\n";
+    echo "   - 先月: " . date('Y年m月', strtotime('-1 month')) . "\n";
+    echo "   - 今週: " . date('m/d', strtotime('monday this week')) . " 〜 " . date('m/d', strtotime('sunday this week')) . "\n";
+    echo "\n";
     
 } catch (Exception $e) {
     if (isset($pdo) && $pdo->inTransaction()) {
