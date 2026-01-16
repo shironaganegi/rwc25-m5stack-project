@@ -1,3 +1,6 @@
-# ユーザーの要望に応じてJSONファイルを除外
+
 *.json
+init_sales.php
 .DS_Store
+fix_data.php
+add_sample_data.php

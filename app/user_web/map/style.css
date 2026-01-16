@@ -1,0 +1,19 @@
+/* style.css */
+body { margin: 0; padding: 20px; font-family: sans-serif; }
+#mapid {
+    height: 500px;
+    width: 100%;
+    max-width: 800px;
+    margin-bottom: 20px;
+    border: 1px solid #ccc;
+}
+.controls { margin-bottom: 20px; }
+.btn {
+    padding: 10px 20px;
+    background-color: #38a169;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+.btn:disabled { background-color: #ccc; }

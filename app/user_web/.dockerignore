@@ -1,6 +1,5 @@
-# Git関連のファイルを除外
+
 .git
 .gitignore
 
-# JSONファイルを除外
-*.json
+fetch_recipes.php

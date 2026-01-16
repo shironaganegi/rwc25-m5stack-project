@@ -19,6 +19,7 @@ CREATE TABLE users (
     email VARCHAR(100) UNIQUE NOT NULL,
     password_hash VARCHAR(255) NOT NULL,
     store_name VARCHAR(100),
+    deleted_at TIMESTAMP NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
@@ -29,7 +30,7 @@ CREATE TABLE categories (
     name VARCHAR(100) NOT NULL,
     user_id INT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
 );
 
 -- 商品テーブル
@@ -40,11 +41,24 @@ CREATE TABLE products (
     regular_price DECIMAL(10,2) NOT NULL,
     stock_quantity INT DEFAULT 0,
     stock_status ENUM('in_stock', 'low_stock', 'out_of_stock') DEFAULT 'in_stock',
+    description TEXT,
     user_id INT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE SET NULL,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
+);
+
+-- 店舗マスタテーブル（外部キー参照されるため先に定義）
+CREATE TABLE stores (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    address VARCHAR(255),
+    latitude DECIMAL(10, 8),
+    longitude DECIMAL(11, 8),
+    category ENUM('supermarket', 'pharmacy', 'other') DEFAULT 'supermarket',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
 -- セール情報テーブル
@@ -55,7 +69,6 @@ CREATE TABLE sales (
     discount_amount DECIMAL(10,2),
     start_date DATE NOT NULL,
     end_date DATE NOT NULL,
-    target_stores TEXT,
     inventory_status ENUM('sufficient', 'low', 'out_of_stock') DEFAULT 'sufficient',
     notes TEXT,
     is_active BOOLEAN DEFAULT TRUE,
@@ -63,7 +76,18 @@ CREATE TABLE sales (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
+);
+
+-- セール対象店舗の中間テーブル
+CREATE TABLE sale_stores (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    sale_id INT NOT NULL,
+    store_id INT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (sale_id) REFERENCES sales(id) ON DELETE CASCADE,
+    FOREIGN KEY (store_id) REFERENCES stores(id) ON DELETE CASCADE,
+    UNIQUE KEY unique_sale_store (sale_id, store_id)
 );
 
 -- 売上データテーブル
@@ -77,7 +101,7 @@ CREATE TABLE sales_data (
     user_id INT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
 );
 
 -- 目標設定テーブル
@@ -88,10 +112,10 @@ CREATE TABLE sales_targets (
     target_date DATE NOT NULL,
     user_id INT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
 );
 
--- 通知設定テーブル
+-- 通知設定テーブル（ユーザーと一緒に削除）
 CREATE TABLE notification_settings (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT,
@@ -102,6 +126,71 @@ CREATE TABLE notification_settings (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- ユーザーお気に入り店舗テーブル
+CREATE TABLE user_favorite_stores (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    store_id INT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (store_id) REFERENCES stores(id) ON DELETE CASCADE,
+    UNIQUE KEY unique_user_store (user_id, store_id)
+);
+
+-- ユーザーお気に入り商品テーブル
+CREATE TABLE user_favorite_products (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    product_id INT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE,
+    UNIQUE KEY unique_user_product (user_id, product_id)
+);
+
+-- ユーザー冷蔵庫管理テーブル
+CREATE TABLE user_refrigerator (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    product_id INT,
+    product_name VARCHAR(200) NOT NULL,
+    quantity INT DEFAULT 1,
+    expiry_date DATE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE SET NULL
+);
+
+-- レシピマスタテーブル
+CREATE TABLE recipes (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    external_id VARCHAR(20) UNIQUE NOT NULL COMMENT 'TheMealDB API ID',
+    name VARCHAR(255) NOT NULL,
+    alternate_name VARCHAR(255),
+    category VARCHAR(100),
+    area VARCHAR(100),
+    instructions TEXT,
+    thumbnail_url VARCHAR(500),
+    tags VARCHAR(255),
+    youtube_url VARCHAR(500),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_category (category),
+    INDEX idx_area (area),
+    INDEX idx_name (name)
+);
+
+-- レシピ材料テーブル
+CREATE TABLE recipe_ingredients (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    recipe_id INT NOT NULL,
+    ingredient_name VARCHAR(200) NOT NULL,
+    measure VARCHAR(100),
+    ingredient_order TINYINT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (recipe_id) REFERENCES recipes(id) ON DELETE CASCADE,
+    INDEX idx_recipe (recipe_id),
+    INDEX idx_ingredient (ingredient_name)
 );
 
 -- サンプルユーザーデータの挿入
@@ -130,6 +219,14 @@ INSERT INTO sales_targets (target_amount, target_period, target_date, user_id) V
 
 -- 通知設定の初期化
 INSERT INTO notification_settings (user_id) VALUES (1);
+
+-- サンプル店舗データの挿入（マップ機能用）
+INSERT INTO stores (name, address, latitude, longitude, category) VALUES
+('ライフ八戸ノ里店', '大阪府東大阪市下小阪5-1-2', 34.662625, 135.589097, 'supermarket'),
+('イオン登美ヶ丘店', '奈良県生駒市鹿畑町3027', 34.702891, 135.727234, 'supermarket'),
+('マツモトキヨシ八戸ノ里駅前店', '大阪府東大阪市小阪2-19-15', 34.663245, 135.590123, 'pharmacy'),
+('スギ薬局小阪店', '大阪府東大阪市小阪本町1-3-5', 34.665890, 135.591456, 'pharmacy'),
+('関西スーパー若江店', '大阪府東大阪市若江南町2-1-40', 34.659123, 135.582345, 'supermarket');
 
 -- 追加の店舗ユーザー（サンプルデータ）
 INSERT INTO users (username, email, password_hash, store_name) VALUES

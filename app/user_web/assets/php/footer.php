@@ -35,7 +35,7 @@ function get_svg_icon($filename) {
         <?php echo get_svg_icon('sale-icon.svg'); ?>
     </a>
     <a href="/refrigerator/refrigerator.php" class="footer-button <?php echo isActive('/refrigerator/refrigerator.php'); ?>">
-        <?php echo get_svg_icon('frdge-icon.svg'); ?>
+        <?php echo get_svg_icon('balance-icon.svg'); ?>
     </a>
     <a href="/favorites/favorites.php" class="footer-button <?php echo isActive('/favorites/favorites.php'); ?>">
         <?php echo get_svg_icon('favorite-icon.svg'); // ファイル名を変更 ?>

@@ -20,4 +20,3 @@
     <script src="../includes/script.js"></script>
 </body>
 </html>
-

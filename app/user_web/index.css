@@ -1,135 +1,218 @@
-/* --- index.css --- */
-.slider-section {
-    width: 100%;
-    overflow: hidden;
-    position: relative;
+/* user_web/index.css */
+
+.search-section {
+    padding: 20px;
+    background-color: #f8f8f8;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+/* 画像セクション */
+.refrigerator-image-section {
+    text-align: center;
+    padding: 20px 0;
     background-color: white;
 }
-.slider-container {
+.refrigerator-image-container {
+    max-width: 25%; /* 画像サイズを少し調整 */
+    margin: 0 auto;
+    /* 枠線を外す場合はここを削除 */
+    /* border: 4px solid #ffd700; */
     display: flex;
+    flex-direction: column;
 }
-.slide {
-    width: 100%;
-    flex-shrink: 0;
-    box-sizing: border-box;
-    text-align: center;
-    padding: 20px;
-}
-.slide img {
-    width: 100%;
+
+/* 静的画像用のスタイル */
+.fridge-static-image img {
     display: block;
-    border-radius: 8px;
-    user-select: none;
-    -webkit-user-drag: none;
+    width: 100%;
+    height: auto;
 }
-.slide p {
-    margin: 10px 0;
-    font-weight: bold;
-    color: #333;
-    padding-bottom: 10px;
+
+/* --- アイテムリストエリア --- */
+.item-list-section {
+    padding: 15px;
 }
-.separator {
-    border: none;
-    border-top: 3px solid #ffd700;
-    margin: 0;
-}
-.featured-section {
-    padding: 20px;
-    box-sizing: border-box;
-    text-align: center;
-}
-.featured-title {
-    font-size: 1.2rem;
+.list-header {
+    padding: 0 10px;
     font-weight: bold;
     color: #333;
     margin-bottom: 15px;
+    font-size: 1.2rem;
+    border-bottom: 2px solid #eee;
+    padding-bottom: 8px;
 }
-.featured-image {
-    width: 100%;
+
+.items-container {
+    background-color: white;
     border-radius: 8px;
-    display: block;
-    margin: 0 auto;
-}
-.slider-dots {
-    position: absolute;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
     display: flex;
-    gap: 8px;
-}
-.dot {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    background-color: #ccc;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-}
-.dot.active {
-    background-color: #ffd700;
+    flex-direction: column;
 }
 
-/* --- Lightbox Styles for index.php --- */
-.enlargeable-image {
-    cursor: zoom-in;
-}
-
-/* index.phpの<style>タグの中 */
-
-.lightbox {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.85);
-    z-index: 2000;
-    display: none;
-    justify-content: center;
+.fridge-item {
+    display: flex;
     align-items: center;
-    padding: 0; /* 変更: 20px → 0 */
-    box-sizing: border-box;
+    gap: 15px;
+    padding: 15px 10px;
+    border-bottom: 1px solid #eee;
+    background: #fff;
+}
+.fridge-item:last-child {
+    border-bottom: none;
 }
 
-
-.lightbox.active {
-    display: flex;
-}
-
-/* index.phpの<style>タグの中 */
-
-.lightbox-content {
-    position: relative;
-    max-width: 100%;  /* 変更: 95% → 100% */
-    max-height: 100%; /* 変更: 95% → 100% */
-}
-
-/* index.phpの<style>タグの中 */
-
-#lightboxImage {
-    width: 100vw;
-    height: 100vh;
+.fridge-item .item-image {
+    width: 70px;
+    height: 70px;
     object-fit: contain;
-    display: block;
-    transition: transform 0.3s ease;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    border: 1px solid #eee;
+    flex-shrink: 0;
 }
 
+.fridge-item .item-details {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 4px;
+}
 
+.fridge-item .item-details p {
+    margin: 0;
+    line-height: 1.5;
+}
 
-.lightbox-close {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    width: 40px;
-    height: 40px;
-    background-color: rgba(0, 0, 0, 0.5);
-    color: white;
-    border: none;
-    border-radius: 50%;
-    font-size: 28px;
-    line-height: 40px;
+.fridge-item .item-details .item-brand {
+    font-size: 0.85rem;
+    color: #888;
+}
+
+.fridge-item .item-details .item-name {
+    font-weight: bold;
+    font-size: 1.25rem;
+    color: #222;
+    margin-bottom: 4px;
+}
+
+.item-dates {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 20px;
+    align-items: baseline;
+}
+
+.fridge-item .item-details .item-info {
+    font-size: 1rem;
+    color: #444;
+    font-weight: 500;
+}
+
+/* --- 追加フォーム --- */
+.add-item-container {
+    background-color: white;
+    margin-top: 20px;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+.add-item-container h3 {
+    margin: 0 0 15px 0;
+    font-size: 1.1rem;
+    color: #333;
+    border-left: 5px solid #ffd700;
+    padding-left: 10px;
+}
+.add-item-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+.form-row {
+    display: flex;
+    gap: 10px;
+}
+.form-input {
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 1rem;
+    flex-grow: 1;
+    box-sizing: border-box;
+    background-color: #fdfdfd;
+}
+.form-input:focus {
+    outline: none;
+    border-color: #ffd700;
+    background-color: #fff;
+}
+.form-input-small {
+    width: 80px;
+    flex-grow: 0;
     text-align: center;
+}
+
+.date-input-group {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+}
+.date-input-group label {
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+input[type="date"].form-input {
+    color: #333;
+    min-width: 0;
+}
+
+.add-button {
+    background-color: #ffd700;
+    border: none;
+    padding: 12px;
+    border-radius: 6px;
+    font-size: 1rem;
+    font-weight: bold;
     cursor: pointer;
-    z-index: 2001;
+    color: #000;
+    width: 100%;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: transform 0.1s;
+}
+.add-button:active {
+    transform: translateY(2px);
+}
+
+.message {
+    color: #28a745;
+    margin-top: 15px;
+    font-size: 1rem;
+    text-align: center;
+    font-weight: bold;
+}
+
+/* 検索コンテナ */
+.search-container {
+    display: flex;
+    align-items: center;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 10px;
+    background: #fff;
+    margin-bottom: 0;
+}
+.search-icon {
+    width: 24px;
+    height: 24px;
+    color: #888;
+    margin-right: 10px;
+}
+.search-input {
+    border: none;
+    outline: none;
+    font-size: 1rem;
+    flex-grow: 1;
 }
