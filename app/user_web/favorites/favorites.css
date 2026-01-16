@@ -9,6 +9,7 @@
     gap: 10px;
     margin-bottom: 10px;
 }
+
 .tab-btn {
     padding: 8px 20px;
     border: 2px solid #ddd;
@@ -20,11 +21,14 @@
     font-size: 0.9rem;
     transition: all 0.3s;
 }
+
 .tab-btn.active {
-    background: #f5c518; /* 黄色 */
+    background: #f5c518;
+    /* 黄色 */
     border-color: #f5c518;
     color: white;
 }
+
 .tab-btn:hover {
     opacity: 0.8;
 }
@@ -38,6 +42,7 @@
     padding: 5px 10px;
     background: #fff;
 }
+
 .favorites-search .search-arrow {
     color: #f5c518;
     font-weight: bold;
@@ -45,6 +50,7 @@
     margin-right: 8px;
     cursor: pointer;
 }
+
 .search-input {
     border: none;
     outline: none;
@@ -58,6 +64,7 @@
     padding: 20px;
     background-color: white;
 }
+
 .favorites-title {
     font-size: 1.5rem;
     font-weight: bold;
@@ -73,27 +80,31 @@
     flex-direction: column;
     gap: 20px;
 }
+
 .store-item {
     display: flex;
     align-items: center;
     border: 1px solid #eee;
     padding: 10px;
     border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
+
 .store-logo {
     width: 50px;
     height: 50px;
     object-fit: contain;
     margin-right: 15px;
 }
+
 .store-details {
     flex: 1;
 }
+
 .store-name {
     font-weight: bold;
     font-size: 1.1rem;
-    margin: 0; 
+    margin: 0;
 }
 
 /* ハートアイコン */
@@ -102,13 +113,17 @@
     border: none;
     cursor: pointer;
     font-size: 1.5rem;
-    color: #ccc; /* 未登録時はグレー */
+    color: #ccc;
+    /* 未登録時はグレー */
     transition: color 0.2s;
     padding: 5px;
 }
+
 .heart-btn.active {
-    color: #e91e63; /* 登録時はピンク/赤 */
+    color: #e91e63;
+    /* 登録時はピンク/赤 */
 }
+
 .heart-btn:hover {
     transform: scale(1.1);
 }
@@ -116,10 +131,111 @@
 /* 検索結果エリア */
 .search-results-section {
     padding: 20px;
-    background: white; /* 黄色(#fff9db)から白に変更 */
+    background: white;
+    /* 黄色(#fff9db)から白に変更 */
 }
+
 .no-results {
     color: #666;
     text-align: center;
     padding: 20px;
+}
+
+.food-item img {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    border-radius: 50%;
+    /* 画像を円形にする */
+    background-color: #eee;
+    margin-bottom: 8px;
+}
+
+.food-item p {
+    margin: 0;
+    font-weight: 500;
+    font-size: 0.9em;
+}
+
+.store-item {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 15px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    background-color: #fafafa;
+}
+
+.store-logo {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+.store-details {
+    flex: 1;
+}
+
+.store-details .sale-time {
+    font-size: 0.85em;
+    color: #666;
+    margin: 0 0 5px 0;
+}
+
+.store-details .store-name {
+    font-weight: bold;
+    font-size: 1.1em;
+    margin: 0 0 5px 0;
+}
+
+.store-details .store-distance {
+    font-size: 0.9em;
+    color: #666;
+    margin: 0;
+}
+
+.congestion-info {
+    text-align: center;
+    padding: 10px;
+    background-color: #f0f0f0;
+    border-radius: 5px;
+}
+
+.congestion-label {
+    font-size: 0.8em;
+    color: #666;
+    margin: 0 0 5px 0;
+}
+
+.congestion-value {
+    font-size: 1.2em;
+    font-weight: bold;
+    margin: 0;
+}
+
+.remove-button {
+    transition: background-color 0.2s;
+}
+
+.remove-button:hover {
+    background-color: #c82333 !important;
+}
+
+.message {
+    animation: fadeIn 0.3s;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }

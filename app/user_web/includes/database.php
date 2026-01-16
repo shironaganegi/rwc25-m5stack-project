@@ -17,6 +17,9 @@ class Database {
     
     private function __construct() {
         try {
+            // #region agent log
+            file_put_contents('c:\Users\user\GitHub\RWC25-group07\.cursor\debug.log', json_encode(['id'=>'log_'.time().'_conn','timestamp'=>time()*1000,'location'=>'database.php:18','message'=>'DB接続開始','data'=>['host'=>self::HOST,'dbname'=>self::DBNAME,'username'=>self::USERNAME],'sessionId'=>'debug-session','runId'=>'run1','hypothesisId'=>'A,B,C'])."\n", FILE_APPEND);
+            // #endregion
             $this->connection = new PDO(
                 "mysql:host=" . self::HOST . ";port=" . self::PORT . ";dbname=" . self::DBNAME . ";charset=utf8mb4",
                 self::USERNAME,
@@ -27,7 +30,14 @@ class Database {
                     PDO::ATTR_EMULATE_PREPARES => false,
                 ]
             );
+            // #region agent log
+            $tables = $this->connection->query("SHOW TABLES")->fetchAll(PDO::FETCH_COLUMN);
+            file_put_contents('c:\Users\user\GitHub\RWC25-group07\.cursor\debug.log', json_encode(['id'=>'log_'.time().'_tables','timestamp'=>time()*1000,'location'=>'database.php:33','message'=>'存在するテーブル一覧','data'=>['tables'=>$tables,'sale_stores_exists'=>in_array('sale_stores',$tables)],'sessionId'=>'debug-session','runId'=>'run1','hypothesisId'=>'A,C'])."\n", FILE_APPEND);
+            // #endregion
         } catch (PDOException $e) {
+            // #region agent log
+            file_put_contents('c:\Users\user\GitHub\RWC25-group07\.cursor\debug.log', json_encode(['id'=>'log_'.time().'_conn_err','timestamp'=>time()*1000,'location'=>'database.php:35','message'=>'DB接続エラー','data'=>['error'=>$e->getMessage()],'sessionId'=>'debug-session','runId'=>'run1','hypothesisId'=>'A,B,C'])."\n", FILE_APPEND);
+            // #endregion
             throw new Exception("データベース接続エラー: " . $e->getMessage());
         }
     }
@@ -45,9 +55,23 @@ class Database {
     
     // 基本メソッド
     public function select($sql, $params = []) {
-        $stmt = $this->connection->prepare($sql);
-        $stmt->execute($params);
-        return $stmt->fetchAll();
+        // #region agent log
+        file_put_contents('c:\Users\user\GitHub\RWC25-group07\.cursor\debug.log', json_encode(['id'=>'log_'.time().'_select_pre','timestamp'=>time()*1000,'location'=>'database.php:47','message'=>'SQL実行前','data'=>['sql'=>substr($sql,0,200),'params'=>$params,'has_sale_stores'=>strpos($sql,'sale_stores')!==false],'sessionId'=>'debug-session','runId'=>'run1','hypothesisId'=>'A,C'])."\n", FILE_APPEND);
+        // #endregion
+        try {
+            $stmt = $this->connection->prepare($sql);
+            $stmt->execute($params);
+            $result = $stmt->fetchAll();
+            // #region agent log
+            file_put_contents('c:\Users\user\GitHub\RWC25-group07\.cursor\debug.log', json_encode(['id'=>'log_'.time().'_select_success','timestamp'=>time()*1000,'location'=>'database.php:50','message'=>'SQL実行成功','data'=>['row_count'=>count($result)],'sessionId'=>'debug-session','runId'=>'run1','hypothesisId'=>'A,C'])."\n", FILE_APPEND);
+            // #endregion
+            return $result;
+        } catch (PDOException $e) {
+            // #region agent log
+            file_put_contents('c:\Users\user\GitHub\RWC25-group07\.cursor\debug.log', json_encode(['id'=>'log_'.time().'_select_err','timestamp'=>time()*1000,'location'=>'database.php:52','message'=>'SQL実行エラー','data'=>['error'=>$e->getMessage(),'code'=>$e->getCode(),'sql'=>substr($sql,0,200)],'sessionId'=>'debug-session','runId'=>'run1','hypothesisId'=>'A,C'])."\n", FILE_APPEND);
+            // #endregion
+            throw $e;
+        }
     }
     
     public function selectOne($sql, $params = []) {
@@ -139,6 +163,9 @@ class Database {
     }
 
     public function searchCheapestSales($keyword = null) {
+        // #region agent log
+        file_put_contents('c:\Users\user\GitHub\RWC25-group07\.cursor\debug.log', json_encode(['id'=>'log_'.time().'_search_start','timestamp'=>time()*1000,'location'=>'database.php:127','message'=>'searchCheapestSales開始','data'=>['keyword'=>$keyword],'sessionId'=>'debug-session','runId'=>'run1','hypothesisId'=>'A,C'])."\n", FILE_APPEND);
+        // #endregion
         $sql = "
             SELECT
                 p.name as product_name,
@@ -392,7 +419,127 @@ class Database {
         return $this->delete("DELETE FROM user_refrigerator WHERE id = ? AND user_id = ?", [$id, $userId]);
     }
 
-    // --- お気に入り機能用メソッド ---
+    /**
+     * 全店舗データを取得（緯度・経度が設定されているもののみ）
+     */
+    public function getAllStores() {
+        return $this->select("SELECT id, name, address, latitude, longitude, category FROM stores WHERE latitude IS NOT NULL AND longitude IS NOT NULL ORDER BY name");
+    }
+
+    /**
+     * IDリストで店舗を取得
+     */
+    public function getStoresByIds($storeIds) {
+        if (empty($storeIds)) return [];
+        $placeholders = implode(',', array_fill(0, count($storeIds), '?'));
+        return $this->select("SELECT id, name, address, latitude, longitude, category FROM stores WHERE id IN ($placeholders)", $storeIds);
+    }
+
+    /**
+     * お気に入り店舗を取得
+     */
+    public function getFavoriteStores($userId) {
+        return $this->select("
+            SELECT s.id, s.name, s.address, s.latitude, s.longitude, s.category, ufs.created_at
+            FROM user_favorite_stores ufs
+            JOIN stores s ON ufs.store_id = s.id
+            WHERE ufs.user_id = ?
+            ORDER BY ufs.created_at DESC
+        ", [$userId]);
+    }
+
+    /**
+     * お気に入り商品を取得
+     */
+    public function getFavoriteProducts($userId) {
+        return $this->select("
+            SELECT p.id, p.name, p.regular_price, c.name as category_name, ufp.created_at
+            FROM user_favorite_products ufp
+            JOIN products p ON ufp.product_id = p.id
+            LEFT JOIN categories c ON p.category_id = c.id
+            WHERE ufp.user_id = ?
+            ORDER BY ufp.created_at DESC
+        ", [$userId]);
+    }
+
+    /**
+     * お気に入り店舗を追加
+     */
+    public function addFavoriteStore($userId, $storeId) {
+        try {
+            return $this->insert("
+                INSERT INTO user_favorite_stores (user_id, store_id) 
+                VALUES (?, ?)
+            ", [$userId, $storeId]);
+        } catch (PDOException $e) {
+            // 既に存在する場合はエラーを無視（UNIQUE制約）
+            if ($e->getCode() == 23000) {
+                return false;
+            }
+            throw $e;
+        }
+    }
+
+    /**
+     * お気に入り店舗を削除
+     */
+    public function removeFavoriteStore($userId, $storeId) {
+        return $this->delete("
+            DELETE FROM user_favorite_stores 
+            WHERE user_id = ? AND store_id = ?
+        ", [$userId, $storeId]);
+    }
+
+    /**
+     * お気に入り商品を追加
+     */
+    public function addFavoriteProduct($userId, $productId) {
+        try {
+            return $this->insert("
+                INSERT INTO user_favorite_products (user_id, product_id) 
+                VALUES (?, ?)
+            ", [$userId, $productId]);
+        } catch (PDOException $e) {
+            // 既に存在する場合はエラーを無視（UNIQUE制約）
+            if ($e->getCode() == 23000) {
+                return false;
+            }
+            throw $e;
+        }
+    }
+
+    /**
+     * お気に入り商品を削除
+     */
+    public function removeFavoriteProduct($userId, $productId) {
+        return $this->delete("
+            DELETE FROM user_favorite_products 
+            WHERE user_id = ? AND product_id = ?
+        ", [$userId, $productId]);
+    }
+
+    /**
+     * 店舗のセール情報を取得（簡易版）
+     * セールが存在するかどうかのみを返す
+     */
+    public function getStoreSaleTimes($storeId) {
+        $result = $this->selectOne("
+            SELECT COUNT(*) as count
+            FROM sales s
+            JOIN sale_stores ss ON s.id = ss.sale_id
+            WHERE ss.store_id = ? 
+            AND s.is_active = 1
+            AND s.start_date <= CURDATE()
+            AND s.end_date >= CURDATE()
+        ", [$storeId]);
+        
+        if ($result && $result['count'] > 0) {
+            return [['has_sale' => true]];
+        }
+        return [];
+    }
+
+    // --- お気に入り機能用メソッド（リモート側のメソッドも追加） ---
 
     public function getUserFavoriteStores($userId) {
         $sql = "

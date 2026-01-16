@@ -107,6 +107,18 @@ class Database {
     }
     
     /**
+     * 前日の売上合計を取得
+     */
+    public function getYesterdaysSales() {
+        return $this->selectOne("
+            SELECT SUM(total_amount) as total_sales,
+                   COUNT(*) as transaction_count
+            FROM sales_data 
+            WHERE sale_date = DATE_SUB(CURDATE(), INTERVAL 1 DAY)
+        ");
+    }
+    
+    /**
      * 売上目標と達成率を取得
      */
     public function getSalesTarget() {
@@ -249,6 +261,108 @@ class Database {
             WHERE p.name LIKE ? OR c.name LIKE ?
             ORDER BY p.name
         ", ["%$keyword%", "%$keyword%"]);
+    }
+    
+    /**
+     * 全店舗を取得
+     */
+    public function getAllStores() {
+        return $this->select("SELECT id, name, address, category FROM stores ORDER BY name");
+    }
+    
+    /**
+     * セールと店舗の関連付け
+     */
+    public function linkSaleToStores($saleId, $storeIds) {
+        if (empty($storeIds)) {
+            return 0;
+        }
+        
+        $count = 0;
+        foreach ($storeIds as $storeId) {
+            try {
+                $this->insert("
+                    INSERT INTO sale_stores (sale_id, store_id) 
+                    VALUES (?, ?)
+                ", [$saleId, $storeId]);
+                $count++;
+            } catch (PDOException $e) {
+                // 既に存在する場合はスキップ（UNIQUE制約）
+                if ($e->getCode() != 23000) {
+                    throw $e;
+                }
+            }
+        }
+        return $count;
+    }
+    
+    /**
+     * 期間別売上を取得
+     */
+    public function getSalesByPeriod($startDate, $endDate, $userId = null) {
+        $sql = "
+            SELECT SUM(total_amount) as total_sales,
+                   COUNT(*) as transaction_count
+            FROM sales_data 
+            WHERE sale_date >= ? AND sale_date <= ?
+        ";
+        $params = [$startDate, $endDate];
+        
+        if ($userId !== null) {
+            $sql .= " AND user_id = ?";
+            $params[] = $userId;
+        }
+        
+        return $this->selectOne($sql, $params);
+    }
+    
+    /**
+     * 日別売上を取得
+     */
+    public function getDailySales($startDate, $endDate, $userId = null) {
+        $sql = "
+            SELECT sale_date,
+                   SUM(total_amount) as daily_total,
+                   COUNT(*) as transaction_count
+            FROM sales_data 
+            WHERE sale_date >= ? AND sale_date <= ?
+        ";
+        $params = [$startDate, $endDate];
+        
+        if ($userId !== null) {
+            $sql .= " AND user_id = ?";
+            $params[] = $userId;
+        }
+        
+        $sql .= " GROUP BY sale_date ORDER BY sale_date ASC";
+        
+        return $this->select($sql, $params);
+    }
+    
+    /**
+     * 期間比較（現在期間と前期間の比較）
+     */
+    public function getSalesComparison($currentStart, $currentEnd, $previousStart, $previousEnd, $userId = null) {
+        $current = $this->getSalesByPeriod($currentStart, $currentEnd, $userId);
+        $previous = $this->getSalesByPeriod($previousStart, $previousEnd, $userId);
+        
+        $currentTotal = $current['total_sales'] ?? 0;
+        $previousTotal = $previous['total_sales'] ?? 0;
+        
+        $change = $currentTotal - $previousTotal;
+        $changePercent = 0;
+        if ($previousTotal > 0) {
+            $changePercent = round(($change / $previousTotal) * 100, 1);
+        } elseif ($currentTotal > 0) {
+            $changePercent = 100;
+        }
+        
+        return [
+            'current' => $currentTotal,
+            'previous' => $previousTotal,
+            'change' => $change,
+            'change_percent' => $changePercent
+        ];
     }
 }
 

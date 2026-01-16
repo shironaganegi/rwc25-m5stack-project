@@ -36,6 +36,22 @@ services:
   # env_file:
   #   - ./user_web/.env
 
+  admin:
+    container_name: admin
+    build:
+      context: ./server/admin
+      dockerfile: Dockerfile
+    volumes:
+      - ./server/admin:/var/www/html
+    ports:
+      - "9001:80"
+    environment:
+      - TZ=Asia/Tokyo
+    depends_on:
+      - mysql-container
+    networks:
+      - app-network
+
   mysql-container:
     container_name: "mysql"
     build:
