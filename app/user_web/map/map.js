@@ -27,93 +27,116 @@ document.addEventListener('DOMContentLoaded', function() {
     
     map.addControl(drawControl);
     
-    // 3. 全物件マーカーの表示
-    const propertyMarkers = new L.FeatureGroup();
-    map.addLayer(propertyMarkers);
+    // 3. 全店舗マーカーの表示
+    const storeMarkers = new L.FeatureGroup();
+    map.addLayer(storeMarkers);
     
-    if (typeof ALL_PROPERTIES_DATA !== 'undefined' && ALL_PROPERTIES_DATA.length > 0) {
-        ALL_PROPERTIES_DATA.forEach(property => {
-            const marker = L.marker([property.lat, property.lng]);
+    if (typeof ALL_STORES_DATA !== 'undefined' && ALL_STORES_DATA.length > 0) {
+        ALL_STORES_DATA.forEach(store => {
+            const marker = L.marker([store.lat, store.lng]);
             
             // ポップアップ内容
             const popupContent = `
-                <b>${property.name}</b><br>
-                価格: ${property.price}<br>
-                <a href="/property/${property.id}">詳細へ</a>
+                <b>${store.name}</b><br>
+                ${store.address ? `住所: ${store.address}<br>` : ''}
+                カテゴリ: ${store.category}
             `;
             marker.bindPopup(popupContent);
             
             // マーカーにカスタムプロパティ（ID）を追加
-            marker.options.property_id = property.id;
+            marker.options.store_id = store.id;
             
-            propertyMarkers.addLayer(marker);
+            storeMarkers.addLayer(marker);
         });
     }
 
     // 4. ポリゴン描画完了時のイベントハンドリング
-    // map.js (抜粋)
+    map.on(L.Draw.Event.CREATED, function (e) {
+        // 既存のポリゴンをクリア
+        drawnItems.clearLayers();
+        drawnItems.addLayer(e.layer);
 
-// ... (中略 - 既存のマップ初期化、マーカー表示ロジック)
-
-// 4. ポリゴン描画完了時のイベントハンドリング
-map.on(L.Draw.Event.CREATED, function (e) {
-    // ... (中略 - 既存のポリゴンクリア、座標セット処理)
-
-    if (type === 'polygon') {
-        const latlngs = layer.getLatLngs()[0];
-        const coordinates = latlngs.map(latlng => `${latlng.lat},${latlng.lng}`).join('|');
-        
-        document.getElementById('polygon_coords').value = coordinates;
-
-        // ★★★ 変更・追加箇所: 囲まれた物件IDを抽出 ★★★
-        const insidePropertiesIds = [];
-        
-        propertyMarkers.eachLayer(function(marker) {
-            const latLng = marker.getLatLng();
-            // L.PolyUtil.containsLocationを使用して正確にポリゴン内の判定を行う
-            const isInside = L.PolyUtil.containsLocation(latLng, latlngs, false);
+        if (e.layerType === 'polygon') {
+            const latlngs = e.layer.getLatLngs()[0];
             
-            const markerElement = marker._icon;
-
-            if (isInside) {
-                // 囲まれた場合、ハイライト
-                markerElement.classList.add('highlight-marker');
-                // IDをリストに追加
-                insidePropertiesIds.push(marker.options.property_id);
-            } else {
-                // 囲まれていない場合、ハイライト解除
-                markerElement.classList.remove('highlight-marker');
+            // 描画されたポリゴンが最低3点を持つかチェック（無効なポリゴンの除外）
+            if (latlngs.length < 3) {
+                alert('ポリゴンを形成するには、最低3点が必要です。');
+                drawnItems.clearLayers();
+                document.getElementById('polygon_coords').value = '';
+                document.getElementById('selected_ids').value = '';
+                document.getElementById('search-btn').disabled = true;
+                return; // 処理を終了
             }
-        });
 
-        if (type === 'polygon') {
-        const latlngs = layer.getLatLngs()[0];
-        
-        // ★変更点: 描画されたポリゴンが最低3点を持つかチェック（無効なポリゴンの除外）
-        if (latlngs.length < 3) {
-            alert('ポリゴンを形成するには、最低3点が必要です。');
-            drawnItems.clearLayers();
-            document.getElementById('polygon_coords').value = '';
-            document.getElementById('selected_ids').value = '';
-            document.getElementById('search-btn').disabled = true;
-            return; // 処理を終了
-        }}
-        
-        // 抽出したIDリストをカンマ区切り文字列にして隠しフィールドにセット
-        document.getElementById('selected_ids').value = insidePropertiesIds.join(',');
+            const coordinates = latlngs.map(latlng => `${latlng.lat},${latlng.lng}`).join('|');
+            document.getElementById('polygon_coords').value = coordinates;
 
-        // 検索ボタンを有効化
-        document.getElementById('search-btn').disabled = false;
-    }
-});
+            // 囲まれた店舗IDを抽出
+            const insideStoreIds = [];
+            const polygon = L.polygon(latlngs);
+            
+            storeMarkers.eachLayer(function(marker) {
+                const latLng = marker.getLatLng();
+                const markerElement = marker._icon;
+                
+                // ポリゴン内判定（Leaflet標準APIを使用）
+                // getBounds()で大まかな判定を行い、その後詳細判定
+                if (polygon.getBounds().contains(latLng)) {
+                    // より正確な判定: ポリゴンの境界内かどうか
+                    // Leafletの標準機能でポリゴン内判定を行う
+                    let isInside = false;
+                    const point = latLng;
+                    const polygonPoints = latlngs;
+                    
+                    // Ray casting algorithm (簡易版)
+                    let inside = false;
+                    for (let i = 0, j = polygonPoints.length - 1; i < polygonPoints.length; j = i++) {
+                        const xi = polygonPoints[i].lat, yi = polygonPoints[i].lng;
+                        const xj = polygonPoints[j].lat, yj = polygonPoints[j].lng;
+                        const intersect = ((yi > point.lng) !== (yj > point.lng))
+                            && (point.lat < (xj - xi) * (point.lng - yi) / (yj - yi) + xi);
+                        if (intersect) inside = !inside;
+                    }
+                    isInside = inside;
+
+                    if (isInside) {
+                        // 囲まれた場合、ハイライト
+                        if (markerElement) {
+                            markerElement.classList.add('highlight-marker');
+                        }
+                        // IDをリストに追加
+                        insideStoreIds.push(marker.options.store_id);
+                    } else {
+                        // 囲まれていない場合、ハイライト解除
+                        if (markerElement) {
+                            markerElement.classList.remove('highlight-marker');
+                        }
+                    }
+                } else {
+                    // 境界外の場合はハイライト解除
+                    if (markerElement) {
+                        markerElement.classList.remove('highlight-marker');
+                    }
+                }
+            });
+            
+            // 抽出したIDリストをカンマ区切り文字列にして隠しフィールドにセット
+            document.getElementById('selected_ids').value = insideStoreIds.join(',');
+
+            // 検索ボタンを有効化
+            document.getElementById('search-btn').disabled = false;
+        }
+    });
 
     // 5. その他のイベント処理（削除、検索ボタンクリック）
     map.on(L.Draw.Event.DELETED, function (e) {
         document.getElementById('polygon_coords').value = '';
+        document.getElementById('selected_ids').value = '';
         document.getElementById('search-btn').disabled = true;
         // 全てのハイライトを解除
-        propertyMarkers.eachLayer(function(marker) {
-             if (marker._icon) {
+        storeMarkers.eachLayer(function(marker) {
+            if (marker._icon) {
                 marker._icon.classList.remove('highlight-marker');
             }
         });

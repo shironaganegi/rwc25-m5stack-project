@@ -332,6 +332,22 @@ class Database {
         return $this->delete("DELETE FROM user_refrigerator WHERE id = ? AND user_id = ?", [$id, $userId]);
     }
 
+    /**
+     * 全店舗データを取得（緯度・経度が設定されているもののみ）
+     */
+    public function getAllStores() {
+        return $this->select("SELECT id, name, address, latitude, longitude, category FROM stores WHERE latitude IS NOT NULL AND longitude IS NOT NULL ORDER BY name");
+    }
+
+    /**
+     * IDリストで店舗を取得
+     */
+    public function getStoresByIds($storeIds) {
+        if (empty($storeIds)) return [];
+        $placeholders = implode(',', array_fill(0, count($storeIds), '?'));
+        return $this->select("SELECT id, name, address, latitude, longitude, category FROM stores WHERE id IN ($placeholders)", $storeIds);
+    }
+
 } // Class End
 
 function getDB() { return Database::getInstance(); }

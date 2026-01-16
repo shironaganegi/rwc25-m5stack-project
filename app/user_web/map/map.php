@@ -1,41 +1,27 @@
 <?php
 // ----------------------------------------------------
-// ★ステップ1: ここに、表示したい物件データを定義/取得します★
+// ★ステップ1: データベースから店舗データを取得します★
 // ----------------------------------------------------
-// 実際のアプリケーションではデータベースからデータを取得します。
-// 緯度(lat)と経度(lng)は必須です。
+require_once $_SERVER['DOCUMENT_ROOT'] . '/includes/database.php';
 
-$property_data_list = [
-    [
-        'lat' => 35.6800, 'lng' => 139.7600, 
-        'name' => '中央区高級マンション', 'price' => '8,000万円', 'id' => 101
-    ],
-    [
-        'lat' => 35.6586, 'lng' => 139.7454, 
-        'name' => '東京タワー付近 (港区)', 'price' => '1.2億円', 'id' => 102
-    ],
-    [
-        'lat' => 35.7000, 'lng' => 139.7750, 
-        'name' => '台東区の戸建', 'price' => '4,500万円', 'id' => 103
-    ],
-    [
-        'lat' => 35.6950, 'lng' => 139.7000, 
-        'name' => '新宿駅周辺物件', 'price' => '6,500万円', 'id' => 104
-    ],
-    [
-        'lat' => 35.6700, 'lng' => 139.6900, 
-        'name' => '渋谷駅周辺物件', 'price' => '7,200万円', 'id' => 105
-    ],
-];
+$db = getDB();
+$stores_raw = $db->getAllStores();
 
-// ★追加: IDをキーとする連想配列に変換（result.phpで使用するため）
-$all_properties_by_id = [];
-foreach ($property_data_list as $property) {
-    $all_properties_by_id[$property['id']] = $property;
+// データ構造をJavaScript用に変換（lat/lng形式に統一）
+$store_data_list = [];
+foreach ($stores_raw as $store) {
+    $store_data_list[] = [
+        'id' => (int)$store['id'],
+        'name' => $store['name'],
+        'address' => $store['address'] ?? '',
+        'lat' => (float)$store['latitude'],
+        'lng' => (float)$store['longitude'],
+        'category' => $store['category'] ?? 'supermarket'
+    ];
 }
 
-// JavaScriptに渡すのはIDリストではない、元のリスト（ALL_PROPERTIES_DATA）のまま
-$json_properties = json_encode($property_data_list, JSON_UNESCAPED_UNICODE);
+// JavaScriptに渡すデータ
+$json_stores = json_encode($store_data_list, JSON_UNESCAPED_UNICODE);
 
 ?>
 <!DOCTYPE html>
@@ -58,7 +44,7 @@ $json_properties = json_encode($property_data_list, JSON_UNESCAPED_UNICODE);
     <?php include $_SERVER['DOCUMENT_ROOT'] . '/assets/php/header.php'; ?>
 
     <main>
-        <h1>物件検索：エリアを囲って絞り込み</h1>
+        <h1>スーパーマーケット検索：エリアを囲って絞り込み</h1>
         
         <div class="controls">
             <p>地図上の左上にある**多角形アイコン**をクリックし、検索したいエリアをマウスで描いてください。</p>
@@ -80,7 +66,7 @@ $json_properties = json_encode($property_data_list, JSON_UNESCAPED_UNICODE);
 
     <script>
         // ★ステップ2: PHPからJSONデータを受け取り、JavaScript変数として定義する
-        const ALL_PROPERTIES_DATA = <?php echo $json_properties; ?>;
+        const ALL_STORES_DATA = <?php echo $json_stores; ?>;
     </script>
     <script src="/map/map.js"></script>
 </body>
