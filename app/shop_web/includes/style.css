@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 /* style.css */
 
 /* --- 全体レイアウト --- */
@@ -10,11 +10,14 @@ body {
     flex-direction: column;
     min-height: 100vh;
 }
+
 .container {
     padding: 15px;
     flex-grow: 1;
-    padding-bottom: 70px; /* フッターの高さ分を確保 */
+    padding-bottom: 70px;
+    /* フッターの高さ分を確保 */
 }
+
 a {
     text-decoration: none;
     color: inherit;
@@ -31,6 +34,7 @@ header {
     position: relative;
     z-index: 100;
 }
+
 .hamburger-menu {
     cursor: pointer;
     width: 30px;
@@ -41,6 +45,7 @@ header {
     align-items: center;
     padding: 5px;
 }
+
 .hamburger-menu span {
     display: block;
     width: 100%;
@@ -49,6 +54,7 @@ header {
     border-radius: 2px;
     transition: all 0.3s ease;
 }
+
 .header-title {
     flex-grow: 1;
     text-align: center;
@@ -57,6 +63,7 @@ header {
     color: #333;
     margin-right: 30px;
 }
+
 .header-right-spacer {
     width: 30px;
 }
@@ -67,14 +74,17 @@ header {
     border-radius: 8px;
     padding: 15px;
     margin-bottom: 10px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
+
 .card-content {
     font-size: 24px;
     font-weight: bold;
-    color: #28a745; /* 緑色 */
+    color: #28a745;
+    /* 緑色 */
     margin-top: 5px;
 }
+
 .card-sub-content {
     font-size: 14px;
     color: #777;
@@ -84,6 +94,7 @@ header {
 .form-group {
     margin-bottom: 15px;
 }
+
 .form-group label {
     display: block;
     margin-bottom: 5px;
@@ -91,6 +102,7 @@ header {
     color: #333;
     font-weight: bold;
 }
+
 .form-input {
     width: 100%;
     padding: 10px;
@@ -100,26 +112,32 @@ header {
     font-size: 16px;
     background-color: white;
 }
+
 .input-group {
     display: flex;
     gap: 10px;
 }
+
 .input-group .form-input {
     flex-grow: 1;
 }
+
 .input-group span {
     display: flex;
     align-items: center;
     font-size: 16px;
     color: #555;
 }
+
 textarea.form-input {
     resize: vertical;
     min-height: 80px;
 }
+
 .submit-button {
     padding: 12px 20px;
-    background-color: #28a745; /* 画像のボタンの色 */
+    background-color: #28a745;
+    /* 画像のボタンの色 */
     color: white;
     border: none;
     border-radius: 8px;
@@ -139,19 +157,22 @@ textarea.form-input {
     margin-top: 20px;
     margin-bottom: 10px;
 }
+
 .menu-item {
     background-color: white;
     border-radius: 8px;
     padding: 15px;
     margin-bottom: 10px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     display: block;
     text-decoration: none;
     color: #333;
     font-size: 16px;
     position: relative;
 }
-.menu-item::after { /* 右側の矢印を表現 */
+
+.menu-item::after {
+    /* 右側の矢印を表現 */
     content: '>';
     position: absolute;
     right: 15px;
@@ -159,6 +180,7 @@ textarea.form-input {
     transform: translateY(-50%);
     color: #bbb;
 }
+
 .menu-item:active {
     background-color: #f0f0f0;
 }
@@ -175,9 +197,10 @@ footer {
     justify-content: space-around;
     padding: 5px 0;
     width: 100%;
-    box-shadow: 0 -2px 5px rgba(0,0,0,0.05);
+    box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.05);
     z-index: 100;
 }
+
 .nav-item {
     text-align: center;
     color: #777;
@@ -190,9 +213,12 @@ footer {
     align-items: center;
     justify-content: center;
 }
+
 .nav-item.active {
-    color: #333; /* アクティブは濃い色 */
+    color: #333;
+    /* アクティブは濃い色 */
 }
+
 .nav-item img {
     display: block;
     margin: 0 auto 5px;
@@ -200,6 +226,7 @@ footer {
     width: 24px;
     filter: grayscale(100%);
 }
+
 .nav-item.active img {
     filter: none;
 }
@@ -212,25 +239,28 @@ footer {
     width: 250px;
     height: 100%;
     background-color: #fff;
-    box-shadow: 2px 0 5px rgba(0,0,0,0.2);
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
     transition: left 0.3s ease;
     z-index: 99;
     padding-top: 60px;
     overflow-y: auto;
 }
+
 .side-navigation.open {
     left: 0;
 }
+
 .overlay {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0,0,0,0.5);
+    background-color: rgba(0, 0, 0, 0.5);
     z-index: 98;
     display: none;
 }
+
 .overlay.active {
     display: block;
 }

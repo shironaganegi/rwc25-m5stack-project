@@ -2,7 +2,7 @@
 // 1. 変数の宣言（'Identifier already declared' を防ぐため、ここでのみ宣言）
 // グローバル変数として保持することで、再初期化時に古い地図を削除できます
 if (typeof map === 'undefined') {
-    var map; 
+    var map;
 }
 let drawnItems;
 let propertyMarkers;
@@ -57,7 +57,7 @@ function initDrawTools() {
         edit: { featureGroup: drawnItems },
         draw: {
             polygon: {
-                shapeOptions: { color: '#38a169', weight: 3, opacity: 0.8 }, 
+                shapeOptions: { color: '#38a169', weight: 3, opacity: 0.8 },
                 allowIntersection: false,
                 // ★変更点: ツールチップメッセージをカスタマイズ
                 repeatMode: true, // 連続描画を可能にする
@@ -173,13 +173,13 @@ function initDrawTools() {
             const selectedIdsInput = document.getElementById('selected_ids');
             const searchBtn = document.getElementById('search-btn');
             if (selectedIdsInput) selectedIdsInput.value = insideStoreIds.join(',');
-            
+
             // 検索ボタンを有効化
             if (searchBtn) {
                 searchBtn.disabled = false;
                 searchBtn.textContent = `選択された ${insideStoreIds.length} 件を表示`;
             }
-            
+
             console.log("判定完了。選択ID:", insideStoreIds);
         }
     });
