@@ -19,12 +19,15 @@ include '../includes/header.php'; // 共通ヘッダーの読み込み
         <div class="card-sub-content">明日までのセール: 3件</div>
     </div>
 
-    
+    <div class="card">
+        <div class="card-title">新しいセール情報を追加しませんか？</div>
+        <a href="../saleInput/saleInput.php" class="submit-button" style="margin-top: 10px;">セール情報入力へ</a>
+    </div>
 
     <a href="../saleInput/saleInput.php" class="menu-item" style="text-align: center; margin-top: 15px;">新しいセール情報を追加</a>
     <a href="" class="menu-item" style="text-align: center; margin-top: 15px;">セール情報</a>
     <a href="#" class="menu-item" style="text-align: center;">商品管理</a>
-    <a href="../analys/index.php" class="menu-item" style="text-align: center;">売上分析</a>
+    <a href="../analys/analys.php" class="menu-item" style="text-align: center;">売上分析</a>
     <a href="#" class="menu-item" style="text-align: center;">在庫管理</a>
     <a href="#" class="menu-item" style="text-align: center;">顧客管理</a>
     <a href="#" class="menu-item" style="text-align: center;">お知らせ</a>

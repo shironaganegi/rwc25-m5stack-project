@@ -299,6 +299,83 @@ class Database {
     public function searchProducts($keyword) {
         return $this->select("SELECT p.*, c.name as category_name FROM products p LEFT JOIN categories c ON p.category_id = c.id WHERE p.name LIKE ? OR c.name LIKE ? ORDER BY p.name", ["%$keyword%", "%$keyword%"]);
     }
+    
+    /**
+     * 店舗別のセール情報を取得（店舗ごとにグループ化）
+     */
+    public function getSalesByStore() {
+        $sales = $this->select("
+            SELECT 
+                u.id as store_id,
+                u.store_name,
+                s.id as sale_id,
+                s.sale_price,
+                s.discount_amount,
+                s.start_date,
+                s.end_date,
+                s.notes,
+                p.id as product_id,
+                p.name as product_name,
+                p.regular_price,
+                c.name as category_name
+            FROM sales s
+            JOIN products p ON s.product_id = p.id
+            JOIN users u ON s.user_id = u.id
+            LEFT JOIN categories c ON p.category_id = c.id
+            WHERE s.is_active = 1 
+            AND s.start_date <= CURDATE() 
+            AND s.end_date >= CURDATE()
+            ORDER BY u.store_name, s.start_date DESC
+        ");
+        
+        // 店舗ごとにグループ化
+        $grouped = [];
+        foreach ($sales as $sale) {
+            $storeId = $sale['store_id'];
+            if (!isset($grouped[$storeId])) {
+                // 店舗名からロゴパスを生成（デフォルト値）
+                $storeNameForLogo = strtolower(str_replace([' ', '店', 'ー'], ['_', '', ''], $sale['store_name']));
+                $grouped[$storeId] = [
+                    'id' => $storeId,
+                    'name' => $sale['store_name'],
+                    'logo' => '/assets/image/' . $storeNameForLogo . '_logo.png',
+                    'items' => []
+                ];
+            }
+            
+            // 商品名から画像パスを生成（デフォルト値）
+            $productNameForImage = strtolower(str_replace([' ', '　'], '_', $sale['product_name']));
+            
+            $grouped[$storeId]['items'][] = [
+                'id' => $sale['sale_id'],
+                'product_id' => $sale['product_id'],
+                'name' => $sale['product_name'],
+                'image' => '/assets/image/' . $productNameForImage . '.png',
+                'price_old' => number_format($sale['regular_price']) . '円',
+                'price_new' => number_format($sale['sale_price']) . '円',
+                'time' => $sale['notes'] ?: '終日'
+            ];
+        }
+        
+        return array_values($grouped);
+    }
+    
+    /**
+     * 全店舗情報を取得
+     */
+    public function getAllStores() {
+        return $this->select("
+            SELECT DISTINCT 
+                u.id,
+                u.store_name,
+                u.created_at
+            FROM users u
+            WHERE u.store_name IS NOT NULL
+            ORDER BY u.store_name
+        ");
+    }
+
+
 
     public function getRefrigeratorItems($userId) {
         return $this->select("SELECT * FROM user_refrigerator WHERE user_id = ? ORDER BY expiry_date ASC", [$userId]);
