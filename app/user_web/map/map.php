@@ -45,7 +45,8 @@ $json_properties = json_encode($property_data_list, JSON_UNESCAPED_UNICODE);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>囲って検索</title>
     
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="/assets/css/common.css">
+    <link rel="stylesheet" href="/map/style.css">
     
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
@@ -53,27 +54,34 @@ $json_properties = json_encode($property_data_list, JSON_UNESCAPED_UNICODE);
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
 </head>
 <body>
-    <h1>物件検索：エリアを囲って絞り込み</h1>
-    
-    <div class="controls">
-        <p>地図上の左上にある**多角形アイコン**をクリックし、検索したいエリアをマウスで描いてください。</p>
-        <form id="search-form" method="POST" action="result.php">
-            <input type="hidden" id="polygon_coords" name="polygon_coords" value="">
-            
-            <input type="hidden" id="selected_ids" name="selected_ids" value="">
-            
-            <button type="button" id="search-btn" class="btn">
-                このエリアで検索
-            </button>
-        </form>
-    </div>
 
-    <div id="mapid"></div>
+    <?php include $_SERVER['DOCUMENT_ROOT'] . '/assets/php/header.php'; ?>
+
+    <main>
+        <h1>物件検索：エリアを囲って絞り込み</h1>
+        
+        <div class="controls">
+            <p>地図上の左上にある**多角形アイコン**をクリックし、検索したいエリアをマウスで描いてください。</p>
+            <form id="search-form" method="POST" action="result.php">
+                <input type="hidden" id="polygon_coords" name="polygon_coords" value="">
+                
+                <input type="hidden" id="selected_ids" name="selected_ids" value="">
+                
+                <button type="button" id="search-btn" class="btn">
+                    このエリアで検索
+                </button>
+            </form>
+        </div>
+
+        <div id="mapid"></div>
+    </main>
+
+    <?php include $_SERVER['DOCUMENT_ROOT'] . '/assets/php/footer.php'; ?>
 
     <script>
         // ★ステップ2: PHPからJSONデータを受け取り、JavaScript変数として定義する
         const ALL_PROPERTIES_DATA = <?php echo $json_properties; ?>;
     </script>
-    <script src="map.js"></script>
+    <script src="/map/map.js"></script>
 </body>
 </html>
