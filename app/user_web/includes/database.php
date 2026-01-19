@@ -387,21 +387,6 @@ class Database {
         return array_values($grouped);
     }
     
-    /**
-     * 全店舗情報を取得
-     */
-    public function getAllStores() {
-        return $this->select("
-            SELECT DISTINCT 
-                u.id,
-                u.store_name,
-                u.created_at
-            FROM users u
-            WHERE u.store_name IS NOT NULL
-            ORDER BY u.store_name
-        ");
-    }
-
 
 
     public function getRefrigeratorItems($userId) {
