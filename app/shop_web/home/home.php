@@ -123,7 +123,7 @@ $expiringSalesCount = count($expiringSales);
     </div>
 
     <a href="../saleInput/saleInput.php" class="menu-item" style="text-align: center; margin-top: 15px;">新しいセール情報を追加</a>
-    <a href="" class="menu-item" style="text-align: center; margin-top: 15px;">セール情報</a>
+    <a href="../sale/sale.php" class="menu-item" style="text-align: center; margin-top: 15px;">セール情報</a>
     <a href="#" class="menu-item" style="text-align: center;">商品管理</a>
     <a href="../analys/analys.php" class="menu-item" style="text-align: center;">売上分析</a>
     <a href="#" class="menu-item" style="text-align: center;">在庫管理</a>
