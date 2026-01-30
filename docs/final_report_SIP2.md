@@ -51,11 +51,11 @@ QRコードを読み込み、QRコードに含まれるデータを表示する�
   <img src="./Image/shopM5_2.jpg" alt="画像2" width="49%">
 </div>
 
-「自身のQRコードを表示する機能」、「地図を表示する機能」、「気象情報を表示する機能」
+「自身のQRコードを表示する機能」、実装済みだが、写真不足の「地図を表示する機能」、「気象情報を表示する機能」
 <div class="image-container">
-  <img src="./Image/userM5_1.jpg" alt="画像1" width="32%">
+  <img src="./Image/user1-2.png" alt="画像1" width="32%">
   <img src="./Image/userM5_2.jpg" alt="画像2" width="32%">
-  <img src="./Image/userM5_3.jpg" alt="画像3" width="32%">
+  <img src="./Image/user3-2.png" alt="画像3" width="32%">
 </div>
 
 - ショップ側のwebアプリ
