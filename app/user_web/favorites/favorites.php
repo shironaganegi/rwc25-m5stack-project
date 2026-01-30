@@ -139,58 +139,6 @@ function calculateDistance($lat, $lon) {
             </form>
         </section>
 
-        <?php if ($searchQuery !== ''): ?>
-            <section class="search-results-section">
-                <h3 class="favorites-title">検索結果: "<?php echo htmlspecialchars($searchQuery); ?>"</h3>
-                
-                <?php if (empty($searchResults)): ?>
-                    <p class="no-results">見つかりませんでした。</p>
-                <?php else: ?>
-                    <?php if ($currentTab === 'store'): ?>
-                        <div class="store-list">
-                            <?php foreach ($searchResults as $store): ?>
-                                <div class="store-item">
-                                    <img src="<?php echo getStoreLogo($store['name']); ?>" class="store-logo">
-                                    <div class="store-details">
-                                        <p class="store-name"><?php echo htmlspecialchars($store['name']); ?></p>
-                                    </div>
-                                    <form method="POST" id="fav_store_<?php echo $store['id']; ?>">
-                                        <input type="hidden" name="action" value="toggle_store">
-                                        <input type="hidden" name="store_id" value="<?php echo $store['id']; ?>">
-                                        <button type="button" class="heart-btn <?php echo !empty($store['is_favorite']) ? 'active' : ''; ?>" 
-                                                onclick="toggleFavorite('fav_store_<?php echo $store['id']; ?>')">
-                                            <?php echo !empty($store['is_favorite']) ? '♥' : '♡'; ?>
-                                        </button>
-                                    </form>
-                                </div>
-                            <?php endforeach; ?>
-                        </div>
-
-                    <?php else: ?>
-                        <div class="store-list">
-                            <?php foreach ($searchResults as $prod): ?>
-                                <div class="store-item">
-                                    <img src="<?php echo getProductImage($prod['name']); ?>" class="store-logo">
-                                    <div class="store-details">
-                                        <p class="store-name"><?php echo htmlspecialchars($prod['name']); ?></p>
-                                    </div>
-                                    <form method="POST" id="fav_food_res_<?php echo $prod['id']; ?>">
-                                        <input type="hidden" name="action" value="toggle_food">
-                                        <input type="hidden" name="food_name" value="<?php echo htmlspecialchars($prod['name']); ?>">
-                                        <button type="button" class="heart-btn <?php echo !empty($prod['is_favorite']) ? 'active' : ''; ?>" 
-                                                onclick="toggleFavorite('fav_food_res_<?php echo $prod['id']; ?>')">
-                                            <?php echo !empty($prod['is_favorite']) ? '♥' : '♡'; ?>
-                                        </button>
-                                    </form>
-                                </div>
-                            <?php endforeach; ?>
-                        </div>
-                    <?php endif; ?>
-                <?php endif; ?>
-            </section>
-            <hr class="yellow-separator">
-        <?php endif; ?>
-
         <section class="favorites-section">
             <h2 class="favorites-title">店舗情報</h2>
             <?php if (empty($favorite_stores)): ?>
@@ -234,7 +182,6 @@ function calculateDistance($lat, $lon) {
 
         <section class="favorites-section">
             <h2 class="favorites-title">お気に入り食べ物</h2>
-<<<<<<< HEAD
             <?php if (empty($favorite_products)): ?>
                 <p style="color: #666; padding: 20px;">お気に入り商品がありません</p>
             <?php else: ?>
