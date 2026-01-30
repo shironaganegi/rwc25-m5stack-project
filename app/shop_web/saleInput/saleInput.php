@@ -11,7 +11,7 @@ include '../includes/header.php';
 
 // データベース接続
 $db = Database::getInstance();
-$userId = 1; // デフォルトユーザーID
+// $userId = 1; // デフォルトユーザーID
 
 // メッセージ変数
 $message = '';
