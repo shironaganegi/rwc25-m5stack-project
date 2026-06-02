@@ -1,0 +1,137 @@
+# 後期中間レポート
+
+## 1. チーム情報と役割
+- チーム名：_スーパー・ドリーム隊 !!_
+- メンバーと役割：
+  - 藤田 彩翔：マネージャー、DB開発
+  - 高橋 優也：客側のWebの制作、客側アプリの一部デザイン
+  - 田中 咲百：お店側のWebの制作、全体設計
+  - 藤井 聖也：客側のM5Stackのシステム制作、店側アプリのデザイン
+  - 西田 陽輝：店側のM5Stackのシステム設計、店側のアプリデザイン 
+
+---
+## 2. 開発するものの概要
+
+### 2.1 ステークホルダーとアプリ概要  
+
+- ステークホルダー：
+  家計などを気にしてなるべく安く済ませたい主婦・お惣菜をよく買うお年寄り
+  
+- 解決したい課題：
+  スーパーごとの価格が分からず、最適な店を選べない・お店側ではどれほどのお客さんが来るかのデータが少なく惣菜など食材が無駄になっている可能性がある点
+- 得られる価値：
+  家計をより管理しやすくできる
+  購入者の購買データが可視化でき効果的なマーケティング戦略が組める
+- アプリ概要：
+  - システム名：スーパーチープくん
+    - 主な機能：　
+        - スーパーごとの値段比較
+        - セール情報のまとめとリアルタイムな反映
+        - 地図で囲ってスーパー検索
+        - 買い物リストを使った買い物の最適化
+        - 冷蔵庫内情報の可視化
+
+
+### 2.2 UIと主要な機能  
+- ユーザー側のM5stack
+<div class="image-container">
+  <img src="./Image/shopM5_1.jpg" alt="画像1" width="49%">
+  <img src="./Image/shopM5_2.jpg" alt="画像2" width="49%">
+</div>
+
+- ユーザー側のM5stack
+<div class="image-container">
+  <img src="./Image/userM5_1.jpg" alt="画像1" width="32%">
+  <img src="./Image/userM5_2.jpg" alt="画像2" width="32%">
+  <img src="./Image/userM5_3.jpg" alt="画像3" width="32%">
+</div>
+
+- ショップ側のwebアプリ
+<div class="image-container">
+  <img src="./Image/shopWeb_1.png" alt="画像1" width="49%">
+  <img src="./Image/shopWeb_2.png" alt="画像2" width="49%">
+  <img src="./Image/shopWeb_3.png" alt="画像3" width="49%">
+  <img src="./Image/shopWeb_4.png" alt="画像3" width="49%">
+</div>
+
+- ユーザー側のwebアプリ
+<div class="image-container">
+  <img src="./Image/userWeb_1.png" alt="画像1" width="32%">
+  <img src="./Image/userWeb_2.png" alt="画像2" width="32%">
+  <img src="./Image/userWeb_3.png" alt="画像3" width="32%">
+  <img src="./Image/userWeb_4.png" alt="画像3" width="32%">
+  <img src="./Image/userWeb_5.png" alt="画像3" width="32%">
+  <img src="./Image/userWeb_6.png" alt="画像3" width="32%">
+</div>
+
+
+- システム構成図：　![システム構成図](/docs/Image/mid.png)
+
+---
+
+## 3. 進捗状況
+
+### 3.1 何がどれだけ終わっているか  
+
+| 項目/機能      | 概要                     | 担当 | 状況 | 進捗 | 備考 |
+|----------------|--------------------------|------|------|------|------|
+|要件定義|立案と要件定義|全員| 完了 | 100%  |  |
+|技術リサーチ|各システムで用いる技術のリサーチ|全員| 完了 | 100%  |  |
+|全体設計|全体のシステム構成と機器構成|田中| 完了 | 100%  |  |
+|アプリデザイン作成|ユーザー、ショップwebアプリのデザインの作成|西田、藤井| 完了 | 100% |  |
+|M5Stackプログラム（ユーザー側）|気象情報、地図、QRコードの表示の機能の実装|藤井、田中| 進行中| 60% |  |
+|M5Stackプログラム（ショップ側）|QRコードの読み取りによるレジへの商品の登録機能の実装|西田、高橋| 進行中| 60% |  |
+|webアプリ作成（ユーザー側）|ユーザ側webサイトのUIの作成|高橋| 進行中 | 60% |  |
+|webアプリ作成（ショップ側）|ショップ側webサイトのUIの作成|田中| 進行中 | 60% |  |
+|API（ユーザー側アプリ作成）|APIからデータを取得しjsonファイルに落とし込む|高橋| 完了 | 100% |  |
+|DB作成|データベースの作成|藤田|進行中| 90% |  |
+|DB繋ぎ合わせ|各システム（M5Stack、webアプリ）とデータベースの繋ぎ合わせ|全員|未着手| 0% |  |
+
+
+### 3.2 開発を中心とした問題点と対応
+ 
+| 問題      | 対処法                    | 状況 |
+|----------------|--------------------------| ----- |
+| レシピAPIのレスポンスが遅かった  | jsonファイルに落とし込んで、DBに移植し使用するようにした。   |対応完了   |
+
+
+
+### 3.3 設計時点からの変更点と変更理由（あれば）  
+
+| 変更点      | 理由                    |
+|----------------|--------------------------|
+|   レシピのデータ取得する方法が変わった|レシピAPIのレスポンスが遅かったから|
+
+---
+
+## 4. 後半やることと注意点
+
+### 4.1 後半の作業  
+
+| 予定期限     | 作業                    | 担当 |
+|----------------|--------------------------| ----- |
+| 11月第1週     | DB作成 | 藤田 |
+| 11月第2週     | DB繋ぎ合わせ | 全員 |
+| 11月第4週     | M5Stackプログラム（ユーザー側） | 藤井 |
+| 11月第4週     | M5Stackプログラム（ショップ側） | 西田 |
+| 11月第4週     | webアプリ作成（ユーザー側） | 高橋 |
+| 11月第4週     | webアプリ作成（ショップ側 | 田中 |
+
+### 4.2 把握しているリスクと対策  
+| リスク     | 対策                    |
+|----------------|--------------------------|
+|本番の回線の安定性の低さ|AWSなどにデプロイする|
+
+# 5. 参考リスト
+>M5Stack で MicroPython を使う - https://oka.medium.com/m5stack-で-micropython-を使う-9a03e8be7ce
+>m5stack/uiflow-micropython - GitHub - https://github.com/m5stack/uiflow-micropython
+>【M5Stack】UIFlowとMicroPythonで開発を始める - https://qiita.com/sho11hei12-1998/items/372f6312908db27c4486
+>M5Stack で MicroPython を使う（ + VSCode から M5Stack を操作する） - https://zenn.dev/ksrnnb/articles/25cbd71bef10c7
+>MicroPython libraries - https://docs.micropython.org/en/v1.22.0/library/index.html
+>builtins.list - M5StickC UIFlow - https://lang-ship.com/reference/unofficial/M5StickC_UIFlow/class/builtins.list/
+>Unit - QR CODE - M5Stack - https://uiflow-micropython.readthedocs.io/en/latest/units/qrcode.html
+>【M5Stack】UIFlow (MicroPython) でI2C接続のQRコードリーダー（unit）を使う - https://zenn.dev/yuta_enginner/articles/e09bc7e5d05bac
+>天気情報取得用API - Free Weather API - WeatherAPI.com - https://www.weatherapi.com/
+>天気情報取得用API - Weather API - OpenWeatherMap - https://openweathermap.org/api
+>CoreS3 ファーム書き込み・プログラム配信 - m5-docs - M5Stack - https://docs.m5stack.com/ja/uiflow2/m5cores3/program
+>M5stack用Python統合開発環境 - Thonny - https://thonny.org/

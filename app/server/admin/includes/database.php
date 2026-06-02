@@ -1,0 +1,52 @@
+<?php
+/**
+ * データベース接続ユーティリティクラス
+ * 管理ツール用データベース接続管理
+ */
+
+class Database {
+    private static $instance = null;
+    private $connection;
+    
+    // データベース設定
+    private const HOST = 'mysql';    // Dockerコンテナ名
+    private const PORT = 3306;        // コンテナ内部のポート
+    private const DBNAME = 'supermarket_app';
+    private const USERNAME = 'dev';
+    private const PASSWORD = 'dev';
+    
+    private function __construct() {
+        try {
+            $this->connection = new PDO(
+                "mysql:host=" . self::HOST . ";port=" . self::PORT . ";dbname=" . self::DBNAME . ";charset=utf8mb4",
+                self::USERNAME,
+                self::PASSWORD,
+                [
+                    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                    PDO::ATTR_EMULATE_PREPARES => false,
+                ]
+            );
+            // 文字セットを明示的に設定
+            $this->connection->exec("SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci");
+        } catch (PDOException $e) {
+            throw new Exception("データベース接続エラー: " . $e->getMessage());
+        }
+    }
+    
+    public static function getInstance() {
+        if (self::$instance === null) {
+            self::$instance = new Database();
+        }
+        return self::$instance;
+    }
+    
+    public function getConnection() {
+        return $this->connection;
+    }
+}
+
+function getDB() {
+    return Database::getInstance();
+}
+?>
