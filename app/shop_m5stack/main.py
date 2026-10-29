@@ -1,3 +1,4 @@
+import os
 import M5
 from M5 import *
 import time
@@ -385,11 +386,18 @@ class QRCodeScannerApp:
 
 # --- アプリケーションの開始部分 ---
 if __name__ == '__main__':
-    # 実行前にWiFiに接続（ご自身の環境のSSIDとパスに変更してください）
-    if connect_wifi("ああ", "Errorno3"):
-        app = QRCodeScannerApp()
-        app.run()
+    # 実行前にWiFiに接続（環境変数のWIFI_SSIDとWIFI_PASSWORDを設定してください）
+    ssid = os.getenv("WIFI_SSID")
+    password = os.getenv("WIFI_PASSWORD")
+
+    if ssid and password:
+        if connect_wifi(ssid, password):
+            app = QRCodeScannerApp()
+            app.run()
+        else:
+            # 接続失敗時はエラーを表示して停止
+            M5.Lcd.fillScreen(0xFF0000)
+            M5.Lcd.print("WiFi Error")
     else:
-        # 接続失敗時はエラーを表示して停止
         M5.Lcd.fillScreen(0xFF0000)
-        M5.Lcd.print("WiFi Error")
+        M5.Lcd.print("Set WIFI_SSID/WIFI_PASSWORD")
